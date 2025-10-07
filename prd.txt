@@ -1,0 +1,53 @@
+Taiyo Williamson
+Brandon Paulsen
+August 28, 2025
+CS-601 - Olga Karpenko
+
+Side Project Proposal
+
+Project Title - 
+Particle Simulator
+
+Team - 
+Taiyo Williamson & Brandon Paulsen
+
+Overview - 
+	We wish to make a fully-interactive and integrated particle simulator Java-based application. This will model the behavior of various particle systems, like gravitational fields, charged particles, and other systems that are within the ~20-hour scope. This visualization is real-time with a few frontend interactive capabilities, but most of the configuration happening in the backend to keep it simple. There will be some parameters that alter the physics engine and a few simulation presets. The simulator will have a noSQL-database backend to store particle simulation data and presets. We will build out a physics engine, simulation component, and render it visually via a 2-dimensional rendering engine/framework, with the stretch goal of moving up to a 3-dimensional rendering space. We hope to build an interactive clean, minimal UI layout. The application components will be containerized via Docker, and deployed to some large cloud platform like GCP.
+
+Required Features - 
+2D particle simulation - allowing for addition of particles/objects, moving particles/objects, and zooming in and out
+Physics Engine - the backend that handles how the particle physics work when new instances are created
+Rendering Engine - A rendering framework imported and implemented to visualize the particle simulation
+Interactive Frontend - 
+Frontend control panel that can make partial-limited modifications to the particle simulation, including physics parameters
+Interacting with the particles with your mouse cursor, being able to drag, zoom, and move in the particle simulation space
+The capacity to pause and resume the simulation
+
+Use Cases - 
+Research
+Educational purpose
+Self-directed learning
+Foundation/insight for - 
+Game development
+More intensive engineering applications
+
+Languages & Tools -
+Java
+Docker
+GCP (or some other cloud hosting/computing tool)
+MongoDB (noSQL)
+JavaFX (switch to a 3D rendering engine as a stretch goal)
+Dyn4j (2D physics engine, swap with 3D as stretch goal)
+Maven dependencies (for build)
+
+Progress Milestone, October 7 - 
+Subset of features accomplished by this milestone:
+Refined scope
+A primitive physics engine that can handle some types of particle simulation
+Simulation & rendering of particles set up for very basic use cases
+All backend-heavy, the interactive frontend is a low-priority item
+
+Backup - 
+In the slight case of the particle simulator project idea not working out, we decided to move with the Java SDK MCP server as a backup project idea.
+
+

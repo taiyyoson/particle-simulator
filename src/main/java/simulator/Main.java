@@ -23,7 +23,6 @@ public class Main extends Application {
     @Override
     public void start(Stage primaryStage) {
         engine = PhysicsEngine.builder().build();
-        createBoundaryWalls();
 
         javafx.scene.layout.BorderPane root = new javafx.scene.layout.BorderPane();
         canvas = new javafx.scene.canvas.Canvas(CANVAS_WIDTH, CANVAS_HEIGHT);
@@ -44,20 +43,6 @@ public class Main extends Application {
         engine.start();
 
         System.out.println("Particle Simulator started with 50 particles!");
-    }
-    private void createBoundaryWalls() {
-        createBoundaryWall(WORLD_WIDTH, 0.5, WORLD_WIDTH / 2, -0.25);
-        createBoundaryWall(WORLD_WIDTH, 0.5, WORLD_WIDTH / 2, WORLD_HEIGHT + 0.25);
-        createBoundaryWall(0.5, WORLD_HEIGHT, -0.25, WORLD_HEIGHT / 2);
-        createBoundaryWall(0.5, WORLD_HEIGHT, WORLD_WIDTH + 0.25, WORLD_HEIGHT / 2);
-    }
-
-    private void createBoundaryWall(double width, double height, double x, double y) {
-        org.dyn4j.dynamics.Body boundary = new org.dyn4j.dynamics.Body();
-        boundary.addFixture(new org.dyn4j.geometry.Rectangle(width, height));
-        boundary.setMass(org.dyn4j.geometry.MassType.INFINITE);
-        boundary.translate(x, y);
-        engine.getWorld().addBody(boundary);
     }
 
     private javafx.scene.layout.HBox createControlPanel() {

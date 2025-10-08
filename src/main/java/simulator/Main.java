@@ -45,32 +45,46 @@ public class Main extends Application {
 
         System.out.println("Particle Simulator started with 50 particles!");
     }
-
     private void createBoundaryWalls() {
-        org.dyn4j.dynamics.Body floor = new org.dyn4j.dynamics.Body();
-        floor.addFixture(new org.dyn4j.geometry.Rectangle(WORLD_WIDTH, 0.5));
-        floor.setMass(org.dyn4j.geometry.MassType.INFINITE);
-        floor.translate(WORLD_WIDTH / 2, -0.25);
-        engine.getWorld().addBody(floor);
-
-        org.dyn4j.dynamics.Body ceiling = new org.dyn4j.dynamics.Body();
-        ceiling.addFixture(new org.dyn4j.geometry.Rectangle(WORLD_WIDTH, 0.5));
-        ceiling.setMass(org.dyn4j.geometry.MassType.INFINITE);
-        ceiling.translate(WORLD_WIDTH / 2, WORLD_HEIGHT + 0.25);
-        engine.getWorld().addBody(ceiling);
-
-        org.dyn4j.dynamics.Body leftWall = new org.dyn4j.dynamics.Body();
-        leftWall.addFixture(new org.dyn4j.geometry.Rectangle(0.5, WORLD_HEIGHT));
-        leftWall.setMass(org.dyn4j.geometry.MassType.INFINITE);
-        leftWall.translate(-0.25, WORLD_HEIGHT / 2);
-        engine.getWorld().addBody(leftWall);
-
-        org.dyn4j.dynamics.Body rightWall = new org.dyn4j.dynamics.Body();
-        rightWall.addFixture(new org.dyn4j.geometry.Rectangle(0.5, WORLD_HEIGHT));
-        rightWall.setMass(org.dyn4j.geometry.MassType.INFINITE);
-        rightWall.translate(WORLD_WIDTH + 0.25, WORLD_HEIGHT / 2);
-        engine.getWorld().addBody(rightWall);
+        createBoundaryWall(WORLD_WIDTH, 0.5, WORLD_WIDTH / 2, -0.25);
+        createBoundaryWall(WORLD_WIDTH, 0.5, WORLD_WIDTH / 2, WORLD_HEIGHT + 0.25);
+        createBoundaryWall(0.5, WORLD_HEIGHT, -0.25, WORLD_HEIGHT / 2);
+        createBoundaryWall(0.5, WORLD_HEIGHT, WORLD_WIDTH + 0.25, WORLD_HEIGHT / 2);
     }
+
+    private void createBoundaryWall(double width, double height, double x, double y) {
+        org.dyn4j.dynamics.Body boundary = new org.dyn4j.dynamics.Body();
+        boundary.addFixture(new org.dyn4j.geometry.Rectangle(width, height));
+        boundary.setMass(org.dyn4j.geometry.MassType.INFINITE);
+        boundary.translate(x, y);
+        engine.getWorld().addBody(boundary);
+    }
+
+    // private void createBoundaryWalls() {
+    //     org.dyn4j.dynamics.Body floor = new org.dyn4j.dynamics.Body();
+    //     floor.addFixture(new org.dyn4j.geometry.Rectangle(WORLD_WIDTH, 0.5));
+    //     floor.setMass(org.dyn4j.geometry.MassType.INFINITE);
+    //     floor.translate(WORLD_WIDTH / 2, -0.25);
+    //     engine.getWorld().addBody(floor);
+
+    //     org.dyn4j.dynamics.Body ceiling = new org.dyn4j.dynamics.Body();
+    //     ceiling.addFixture(new org.dyn4j.geometry.Rectangle(WORLD_WIDTH, 0.5));
+    //     ceiling.setMass(org.dyn4j.geometry.MassType.INFINITE);
+    //     ceiling.translate(WORLD_WIDTH / 2, WORLD_HEIGHT + 0.25);
+    //     engine.getWorld().addBody(ceiling);
+
+    //     org.dyn4j.dynamics.Body leftWall = new org.dyn4j.dynamics.Body();
+    //     leftWall.addFixture(new org.dyn4j.geometry.Rectangle(0.5, WORLD_HEIGHT));
+    //     leftWall.setMass(org.dyn4j.geometry.MassType.INFINITE);
+    //     leftWall.translate(-0.25, WORLD_HEIGHT / 2);
+    //     engine.getWorld().addBody(leftWall);
+
+    //     org.dyn4j.dynamics.Body rightWall = new org.dyn4j.dynamics.Body();
+    //     rightWall.addFixture(new org.dyn4j.geometry.Rectangle(0.5, WORLD_HEIGHT));
+    //     rightWall.setMass(org.dyn4j.geometry.MassType.INFINITE);
+    //     rightWall.translate(WORLD_WIDTH + 0.25, WORLD_HEIGHT / 2);
+    //     engine.getWorld().addBody(rightWall);
+    // }
 
     private javafx.scene.layout.HBox createControlPanel() {
         javafx.scene.layout.HBox controls = new javafx.scene.layout.HBox(10);

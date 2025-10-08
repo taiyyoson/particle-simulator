@@ -22,7 +22,7 @@ public class Main extends Application {
 
     @Override
     public void start(Stage primaryStage) {
-        engine = new PhysicsEngine();
+        engine = PhysicsEngine.builder().build();
         createBoundaryWalls();
 
         javafx.scene.layout.BorderPane root = new javafx.scene.layout.BorderPane();
@@ -59,32 +59,6 @@ public class Main extends Application {
         boundary.translate(x, y);
         engine.getWorld().addBody(boundary);
     }
-
-    // private void createBoundaryWalls() {
-    //     org.dyn4j.dynamics.Body floor = new org.dyn4j.dynamics.Body();
-    //     floor.addFixture(new org.dyn4j.geometry.Rectangle(WORLD_WIDTH, 0.5));
-    //     floor.setMass(org.dyn4j.geometry.MassType.INFINITE);
-    //     floor.translate(WORLD_WIDTH / 2, -0.25);
-    //     engine.getWorld().addBody(floor);
-
-    //     org.dyn4j.dynamics.Body ceiling = new org.dyn4j.dynamics.Body();
-    //     ceiling.addFixture(new org.dyn4j.geometry.Rectangle(WORLD_WIDTH, 0.5));
-    //     ceiling.setMass(org.dyn4j.geometry.MassType.INFINITE);
-    //     ceiling.translate(WORLD_WIDTH / 2, WORLD_HEIGHT + 0.25);
-    //     engine.getWorld().addBody(ceiling);
-
-    //     org.dyn4j.dynamics.Body leftWall = new org.dyn4j.dynamics.Body();
-    //     leftWall.addFixture(new org.dyn4j.geometry.Rectangle(0.5, WORLD_HEIGHT));
-    //     leftWall.setMass(org.dyn4j.geometry.MassType.INFINITE);
-    //     leftWall.translate(-0.25, WORLD_HEIGHT / 2);
-    //     engine.getWorld().addBody(leftWall);
-
-    //     org.dyn4j.dynamics.Body rightWall = new org.dyn4j.dynamics.Body();
-    //     rightWall.addFixture(new org.dyn4j.geometry.Rectangle(0.5, WORLD_HEIGHT));
-    //     rightWall.setMass(org.dyn4j.geometry.MassType.INFINITE);
-    //     rightWall.translate(WORLD_WIDTH + 0.25, WORLD_HEIGHT / 2);
-    //     engine.getWorld().addBody(rightWall);
-    // }
 
     private javafx.scene.layout.HBox createControlPanel() {
         javafx.scene.layout.HBox controls = new javafx.scene.layout.HBox(10);

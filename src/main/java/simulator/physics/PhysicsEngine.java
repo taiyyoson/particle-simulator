@@ -12,13 +12,40 @@ public class PhysicsEngine {
     private List<Particle> particles;
     private boolean running;
 
-    private static final double GRAVITY_Y = -9.8;
-    private static final double TIME_STEP = 1.0 / 60.0;
+    private double TIME_STEP = 1.0 / 60.0;
 
-    public PhysicsEngine() {
-        this.world = new World<>();
+    public static class Builder {
+        private double GRAVITY_X = 0;
+        private double GRAVITY_Y = -9.8;
+        private double TIME_STEP = 1.0 / 60.0;
+
+        public void setGravityX(double GRAVITY_X) {
+            this.GRAVITY_X = GRAVITY_X;
+        }
+
+        public void setGravityY(double GRAVITY_Y) {
+            this.GRAVITY_Y = GRAVITY_Y;
+        }
+
+        public void setTimeStep(double TIME_STEP) {
+            this.TIME_STEP = TIME_STEP;
+        }
+
+        public PhysicsEngine build() {
+            assert 0 < TIME_STEP;
+            return new PhysicsEngine(GRAVITY_X, GRAVITY_Y, TIME_STEP);
+        }
+    }
+
+    public static Builder builder() {
+        return new Builder();
+    }
+
+    private PhysicsEngine(double GRAVITY_X, double GRAVITY_Y, double TIME_STEP) {
+        this.TIME_STEP = TIME_STEP;
+        this.world = new World();
         this.world.setGravity(new Vector2(0, GRAVITY_Y));
-        this.particles = new ArrayList<>();
+        this.particles = new ArrayList();
         this.running = false;
     }
 

@@ -9,10 +9,11 @@ import javafx.scene.canvas.Canvas;
 import javafx.scene.Scene;
 import javafx.scene.layout.HBox;
 import javafx.scene.control.Button;
+import javafx.scene.canvas.GraphicsContext;
 import javafx.animation.AnimationTimer;
 import javafx.scene.paint.Color;
+import javafx.scene.text.Font;
 
-import java.util.Random;
 
 public class Main extends Application {
 
@@ -23,10 +24,16 @@ public class Main extends Application {
     private static final double WORLD_HEIGHT = 12.0; // meters
     private static final double SCALE = CANVAS_WIDTH / WORLD_WIDTH; // pixels per meter
 
+    private static final Color backgroundColor = Color.web("#1a1a1a");
+    private static final Color borderColor = javafx.scene.paint.Color.WHITE;
+    private static final int borderWidth = 1;
+    private static final Color textColor = javafx.scene.paint.Color.WHITE;
+    private static final Font textFont = javafx.scene.text.Font.font("Monospace", 14);
+
     private PhysicsEngine engine;
-    private javafx.scene.canvas.Canvas canvas;
-    private javafx.scene.canvas.GraphicsContext gc;
-    private javafx.animation.AnimationTimer gameLoop;
+    private Canvas canvas;
+    private GraphicsContext gc;
+    private AnimationTimer gameLoop;
 
     @Override
     public void start(Stage primaryStage) {
@@ -37,8 +44,7 @@ public class Main extends Application {
         gc = canvas.getGraphicsContext2D();
         root.setCenter(canvas);
 
-        HBox controls = createControlPanel();
-        root.setBottom(controls);
+        root.setBottom(createControlPanel());
 
         Scene scene = new Scene(root, CANVAS_WIDTH, CANVAS_HEIGHT + 50);
         primaryStage.setTitle("Particle Simulator - Dyn4j + JavaFX");
@@ -105,7 +111,7 @@ public class Main extends Application {
     }
 
     private void render() {
-        gc.setFill(Color.web("#1a1a1a"));
+        gc.setFill(backgroundColor);
         gc.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
 
         for (Particle particle : engine.getParticles()) {
@@ -117,14 +123,14 @@ public class Main extends Application {
             gc.fillOval(screenX - screenRadius, screenY - screenRadius,
                        screenRadius * 2, screenRadius * 2);
 
-            gc.setStroke(javafx.scene.paint.Color.WHITE);
-            gc.setLineWidth(1);
+            gc.setStroke(borderColor);
+            gc.setLineWidth(borderWidth);
             gc.strokeOval(screenX - screenRadius, screenY - screenRadius,
                          screenRadius * 2, screenRadius * 2);
         }
 
-        gc.setFill(javafx.scene.paint.Color.WHITE);
-        gc.setFont(javafx.scene.text.Font.font("Monospace", 14));
+        gc.setFill(textColor);
+        gc.setFont(textFont);
         gc.fillText("Particles: " + engine.getParticles().size(), 10, 20);
     }
 

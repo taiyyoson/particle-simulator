@@ -4,6 +4,13 @@ import simulator.physics.PhysicsEngine;
 import simulator.models.Particle;
 import javafx.application.Application;
 import javafx.stage.Stage;
+import javafx.scene.layout.BorderPane;
+import javafx.scene.canvas.Canvas;
+import javafx.scene.Scene;
+import javafx.scene.layout.HBox;
+import javafx.scene.control.Button;
+import javafx.animation.AnimationTimer;
+import javafx.scene.paint.Color;
 
 import java.util.Random;
 
@@ -24,21 +31,21 @@ public class Main extends Application {
     public void start(Stage primaryStage) {
         engine = PhysicsEngine.builder().build();
 
-        javafx.scene.layout.BorderPane root = new javafx.scene.layout.BorderPane();
-        canvas = new javafx.scene.canvas.Canvas(CANVAS_WIDTH, CANVAS_HEIGHT);
+        BorderPane root = new BorderPane();
+        canvas = new Canvas(CANVAS_WIDTH, CANVAS_HEIGHT);
         gc = canvas.getGraphicsContext2D();
         root.setCenter(canvas);
 
-        javafx.scene.layout.HBox controls = createControlPanel();
+        HBox controls = createControlPanel();
         root.setBottom(controls);
 
-        javafx.scene.Scene scene = new javafx.scene.Scene(root, CANVAS_WIDTH, CANVAS_HEIGHT + 50);
+        Scene scene = new Scene(root, CANVAS_WIDTH, CANVAS_HEIGHT + 50);
         primaryStage.setTitle("Particle Simulator - Dyn4j + JavaFX");
         primaryStage.setScene(scene);
         primaryStage.setResizable(false);
         primaryStage.show();
 
-        spawnRandomParticles(engine, 50, WORLD_WIDTH, WORLD_HEIGHT);
+        engine.spawnRandomParticles(50);
         startGameLoop();
         engine.start();
 
@@ -46,12 +53,12 @@ public class Main extends Application {
     }
 
     private javafx.scene.layout.HBox createControlPanel() {
-        javafx.scene.layout.HBox controls = new javafx.scene.layout.HBox(10);
+        HBox controls = new HBox(10);
         controls.setPadding(new javafx.geometry.Insets(10));
         controls.setAlignment(javafx.geometry.Pos.CENTER);
         controls.setStyle("-fx-background-color: #2c3e50;");
 
-        javafx.scene.control.Button pauseBtn = new javafx.scene.control.Button("Pause");
+        Button pauseBtn = new Button("Pause");
         pauseBtn.setOnAction(e -> {
             if (engine.isRunning()) {
                 engine.pause();
@@ -62,16 +69,16 @@ public class Main extends Application {
             }
         });
 
-        javafx.scene.control.Button resetBtn = new javafx.scene.control.Button("Reset");
+        Button resetBtn = new Button("Reset");
         resetBtn.setOnAction(e -> {
             engine.reset();
-            spawnRandomParticles(engine, 50, WORLD_WIDTH, WORLD_HEIGHT);
+            engine.addRandomParticles(50);
             engine.start();
         });
 
-        javafx.scene.control.Button addParticlesBtn = new javafx.scene.control.Button("Add 10 Particles");
+        Button addParticlesBtn = new Button("Add 10 Particles");
         addParticlesBtn.setOnAction(e -> {
-            spawnRandomParticles(engine, 10, WORLD_WIDTH, WORLD_HEIGHT);
+            engine.spawnRandomParticles(10);
         });
 
         controls.getChildren().addAll(pauseBtn, resetBtn, addParticlesBtn);
@@ -79,7 +86,7 @@ public class Main extends Application {
     }
 
     private void startGameLoop() {
-        gameLoop = new javafx.animation.AnimationTimer() {
+        gameLoop = new AnimationTimer() {
             @Override
             public void handle(long now) {
                 engine.update();
@@ -90,7 +97,7 @@ public class Main extends Application {
     }
 
     private void render() {
-        gc.setFill(javafx.scene.paint.Color.web("#1a1a1a"));
+        gc.setFill(Color.web("#1a1a1a"));
         gc.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
 
         for (Particle particle : engine.getParticles()) {
@@ -111,29 +118,6 @@ public class Main extends Application {
         gc.setFill(javafx.scene.paint.Color.WHITE);
         gc.setFont(javafx.scene.text.Font.font("Monospace", 14));
         gc.fillText("Particles: " + engine.getParticles().size(), 10, 20);
-    }
-
-    private void spawnRandomParticles(PhysicsEngine engine, int count,
-                                      double canvasWidth, double canvasHeight) {
-        Random rand = new Random();
-
-        for (int i = 0; i < count; i++) {
-            double x = rand.nextDouble() * (canvasWidth - 2) + 1;
-            double y = rand.nextDouble() * (canvasHeight - 2) + 1;
-            double radius = 0.2 + rand.nextDouble() * 0.3;
-            double mass = 1 + rand.nextDouble() * 9;
-
-            Particle particle = new Particle(x, y, radius, mass);
-
-            double vx = (rand.nextDouble() - 0.5) * 10;
-            double vy = (rand.nextDouble() - 0.5) * 10;
-            particle.setVelocity(vx, vy);
-
-            String[] colors = {"#FF6B6B", "#4ECDC4", "#45B7D1", "#FFA07A", "#98D8C8"};
-            particle.setColor(colors[rand.nextInt(colors.length)]);
-
-            engine.addParticle(particle);
-        }
     }
 
     public static void main(String[] args) {

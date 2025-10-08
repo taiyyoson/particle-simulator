@@ -9,11 +9,12 @@ import simulator.models.Particle;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 public class PhysicsEngine {
-    private World<org.dyn4j.dynamics.Body> world;
-    private List<Particle> particles;
-    private boolean running;
+    private World<org.dyn4j.dynamics.Body> world = new World();
+    private List<Particle> particles = new ArrayList();
+    private boolean running = false;
 
     private double TIME_STEP;
     private double WORLD_WIDTH;
@@ -73,10 +74,7 @@ public class PhysicsEngine {
         this.TIME_STEP = TIME_STEP;
         this.WORLD_WIDTH = WORLD_WIDTH;
         this.WORLD_HEIGHT = WORLD_HEIGHT;
-        this.world = new World();
         this.world.setGravity(new Vector2(0, GRAVITY_Y));
-        this.particles = new ArrayList();
-        this.running = false;
         if(BOUNDED) {
             createBoundaryWalls();
         }
@@ -95,6 +93,25 @@ public class PhysicsEngine {
         boundary.setMass(MassType.INFINITE);
         boundary.translate(x, y);
         world.addBody(boundary);
+    }
+
+    public void addRandomParticles(int numParticles) {
+        for(int i = 0; i < count; i++) {
+            addRandomParticle();
+        }
+    }
+
+    public void addRandomParticle() {
+        Random rand = new Random();
+        double x = 1 + rand.nextDouble() * (WORLD_WIDTH - 2);
+        double y = 1 + rand.nextDouble() * (WORLD_HEIGHT - 2);
+        double radius = 0.2 + rand.nextDouble() * 0.3;
+        double mass = 1 + rand.nextDouble() * 9;
+        Particle particle = new Particle(x, y, radius, mass);
+        double vx = (rand.nextDouble() - 0.5) * 10;
+        double vy = (rand.nextDouble() - 0.5) * 10;
+        particle.setVelocity(vx, vy);
+        addParticle(particle);
     }
 
     public void addParticle(Particle particle) {

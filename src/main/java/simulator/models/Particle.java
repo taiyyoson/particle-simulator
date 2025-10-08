@@ -6,7 +6,10 @@ import org.dyn4j.geometry.Circle;
 import org.dyn4j.geometry.MassType;
 import org.dyn4j.geometry.Vector2;
 
+import java.util.Random;
+
 public class Particle {
+    private static String[] colors = {"#FF6B6B", "#4ECDC4", "#45B7D1", "#FFA07A", "#98D8C8"};
     private Body body;
     private double radius;
     private double mass;
@@ -26,7 +29,7 @@ public class Particle {
         body.addFixture(fixture);
         body.setMass(MassType.NORMAL);
         body.translate(x, y);
-
+        setRandomColor();
         syncFromBody();
     }
 
@@ -55,6 +58,11 @@ public class Particle {
         body.translate(x - this.x, y - this.y);
         this.x = x;
         this.y = y;
+    }
+
+    public void setRandomColor() {
+        Random rand = new Random();
+        setColor(colors[rand.nextInt(colors.length)]);
     }
 
     public Body getBody() { return body; }

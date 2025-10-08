@@ -102,7 +102,7 @@ public class Main extends Application {
                 if(now - prev < dt) {
                     return;
                 }
-                engine.update((now - prev) / nsPerSec);
+                engine.update((double) (now - prev) / (double) nsPerSec);
                 render();
                 prev = now;
             }

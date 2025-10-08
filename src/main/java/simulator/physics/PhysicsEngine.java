@@ -96,7 +96,7 @@ public class PhysicsEngine {
     }
 
     public void addRandomParticles(int numParticles) {
-        for(int i = 0; i < count; i++) {
+        for(int i = 0; i < numParticles; i++) {
             addRandomParticle();
         }
     }

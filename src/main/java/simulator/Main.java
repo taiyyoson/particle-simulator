@@ -45,7 +45,7 @@ public class Main extends Application {
         primaryStage.setResizable(false);
         primaryStage.show();
 
-        engine.spawnRandomParticles(50);
+        engine.addRandomParticles(50);
         startGameLoop();
         engine.start();
 
@@ -78,7 +78,7 @@ public class Main extends Application {
 
         Button addParticlesBtn = new Button("Add 10 Particles");
         addParticlesBtn.setOnAction(e -> {
-            engine.spawnRandomParticles(10);
+            engine.addRandomParticles(10);
         });
 
         controls.getChildren().addAll(pauseBtn, resetBtn, addParticlesBtn);
@@ -87,10 +87,16 @@ public class Main extends Application {
 
     private void startGameLoop() {
         gameLoop = new AnimationTimer() {
+            private long prev = 0;
+            private long dt = 16666667; // 60 fps
             @Override
             public void handle(long now) {
+                if(now - prev < dt) {
+                    return;
+                }
                 engine.update();
                 render();
+                prev = now;
             }
         };
         gameLoop.start();
@@ -105,7 +111,7 @@ public class Main extends Application {
             double screenY = CANVAS_HEIGHT - (particle.getY() * SCALE);
             double screenRadius = particle.getRadius() * SCALE;
 
-            gc.setFill(javafx.scene.paint.Color.web(particle.getColor()));
+            gc.setFill(Color.web(particle.getColor()));
             gc.fillOval(screenX - screenRadius, screenY - screenRadius,
                        screenRadius * 2, screenRadius * 2);
 

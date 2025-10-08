@@ -4,81 +4,68 @@ import simulator.physics.PhysicsEngine;
 import simulator.models.Particle;
 import javafx.application.Application;
 import javafx.stage.Stage;
+import javafx.scene.layout.BorderPane;
+import javafx.scene.canvas.Canvas;
+import javafx.scene.Scene;
+import javafx.scene.layout.HBox;
+import javafx.scene.control.Button;
+import javafx.scene.canvas.GraphicsContext;
+import javafx.animation.AnimationTimer;
+import javafx.scene.paint.Color;
+import javafx.scene.text.Font;
 
-import java.util.Random;
 
 public class Main extends Application {
 
+    private static final int FRAME_RATE = 60;
     private static final int CANVAS_WIDTH = 800;
     private static final int CANVAS_HEIGHT = 600;
     private static final double WORLD_WIDTH = 16.0;  // meters
     private static final double WORLD_HEIGHT = 12.0; // meters
     private static final double SCALE = CANVAS_WIDTH / WORLD_WIDTH; // pixels per meter
 
+    private static final Color backgroundColor = Color.web("#1a1a1a");
+    private static final Color borderColor = javafx.scene.paint.Color.WHITE;
+    private static final int borderWidth = 1;
+    private static final Color textColor = javafx.scene.paint.Color.WHITE;
+    private static final Font textFont = javafx.scene.text.Font.font("Monospace", 14);
+
     private PhysicsEngine engine;
-    private javafx.scene.canvas.Canvas canvas;
-    private javafx.scene.canvas.GraphicsContext gc;
-    private javafx.animation.AnimationTimer gameLoop;
+    private Canvas canvas;
+    private GraphicsContext gc;
+    private AnimationTimer gameLoop;
 
     @Override
     public void start(Stage primaryStage) {
-        engine = new PhysicsEngine();
-        createBoundaryWalls();
+        engine = PhysicsEngine.builder().build();
 
-        javafx.scene.layout.BorderPane root = new javafx.scene.layout.BorderPane();
-        canvas = new javafx.scene.canvas.Canvas(CANVAS_WIDTH, CANVAS_HEIGHT);
+        BorderPane root = new BorderPane();
+        canvas = new Canvas(CANVAS_WIDTH, CANVAS_HEIGHT);
         gc = canvas.getGraphicsContext2D();
         root.setCenter(canvas);
 
-        javafx.scene.layout.HBox controls = createControlPanel();
-        root.setBottom(controls);
+        root.setBottom(createControlPanel());
 
-        javafx.scene.Scene scene = new javafx.scene.Scene(root, CANVAS_WIDTH, CANVAS_HEIGHT + 50);
+        Scene scene = new Scene(root, CANVAS_WIDTH, CANVAS_HEIGHT + 50);
         primaryStage.setTitle("Particle Simulator - Dyn4j + JavaFX");
         primaryStage.setScene(scene);
         primaryStage.setResizable(false);
         primaryStage.show();
 
-        spawnRandomParticles(engine, 50, WORLD_WIDTH, WORLD_HEIGHT);
+        engine.addRandomParticles(50);
         startGameLoop();
         engine.start();
 
         System.out.println("Particle Simulator started with 50 particles!");
     }
 
-    private void createBoundaryWalls() {
-        org.dyn4j.dynamics.Body floor = new org.dyn4j.dynamics.Body();
-        floor.addFixture(new org.dyn4j.geometry.Rectangle(WORLD_WIDTH, 0.5));
-        floor.setMass(org.dyn4j.geometry.MassType.INFINITE);
-        floor.translate(WORLD_WIDTH / 2, -0.25);
-        engine.getWorld().addBody(floor);
-
-        org.dyn4j.dynamics.Body ceiling = new org.dyn4j.dynamics.Body();
-        ceiling.addFixture(new org.dyn4j.geometry.Rectangle(WORLD_WIDTH, 0.5));
-        ceiling.setMass(org.dyn4j.geometry.MassType.INFINITE);
-        ceiling.translate(WORLD_WIDTH / 2, WORLD_HEIGHT + 0.25);
-        engine.getWorld().addBody(ceiling);
-
-        org.dyn4j.dynamics.Body leftWall = new org.dyn4j.dynamics.Body();
-        leftWall.addFixture(new org.dyn4j.geometry.Rectangle(0.5, WORLD_HEIGHT));
-        leftWall.setMass(org.dyn4j.geometry.MassType.INFINITE);
-        leftWall.translate(-0.25, WORLD_HEIGHT / 2);
-        engine.getWorld().addBody(leftWall);
-
-        org.dyn4j.dynamics.Body rightWall = new org.dyn4j.dynamics.Body();
-        rightWall.addFixture(new org.dyn4j.geometry.Rectangle(0.5, WORLD_HEIGHT));
-        rightWall.setMass(org.dyn4j.geometry.MassType.INFINITE);
-        rightWall.translate(WORLD_WIDTH + 0.25, WORLD_HEIGHT / 2);
-        engine.getWorld().addBody(rightWall);
-    }
-
     private javafx.scene.layout.HBox createControlPanel() {
-        javafx.scene.layout.HBox controls = new javafx.scene.layout.HBox(10);
+        HBox controls = new HBox(10);
         controls.setPadding(new javafx.geometry.Insets(10));
         controls.setAlignment(javafx.geometry.Pos.CENTER);
         controls.setStyle("-fx-background-color: #2c3e50;");
 
-        javafx.scene.control.Button pauseBtn = new javafx.scene.control.Button("Pause");
+        Button pauseBtn = new Button("Pause");
         pauseBtn.setOnAction(e -> {
             if (engine.isRunning()) {
                 engine.pause();
@@ -89,16 +76,16 @@ public class Main extends Application {
             }
         });
 
-        javafx.scene.control.Button resetBtn = new javafx.scene.control.Button("Reset");
+        Button resetBtn = new Button("Reset");
         resetBtn.setOnAction(e -> {
             engine.reset();
-            spawnRandomParticles(engine, 50, WORLD_WIDTH, WORLD_HEIGHT);
+            engine.addRandomParticles(50);
             engine.start();
         });
 
-        javafx.scene.control.Button addParticlesBtn = new javafx.scene.control.Button("Add 10 Particles");
+        Button addParticlesBtn = new Button("Add 10 Particles");
         addParticlesBtn.setOnAction(e -> {
-            spawnRandomParticles(engine, 10, WORLD_WIDTH, WORLD_HEIGHT);
+            engine.addRandomParticles(10);
         });
 
         controls.getChildren().addAll(pauseBtn, resetBtn, addParticlesBtn);
@@ -106,18 +93,25 @@ public class Main extends Application {
     }
 
     private void startGameLoop() {
-        gameLoop = new javafx.animation.AnimationTimer() {
+        gameLoop = new AnimationTimer() {
+            private static long nsPerSec = 1000000000;
+            private long prev = 0;
+            private long dt = nsPerSec / (long) FRAME_RATE;
             @Override
             public void handle(long now) {
-                engine.update();
+                if(now - prev < dt) {
+                    return;
+                }
+                engine.update((double) (now - prev) / (double) nsPerSec);
                 render();
+                prev = now;
             }
         };
         gameLoop.start();
     }
 
     private void render() {
-        gc.setFill(javafx.scene.paint.Color.web("#1a1a1a"));
+        gc.setFill(backgroundColor);
         gc.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
 
         for (Particle particle : engine.getParticles()) {
@@ -125,42 +119,19 @@ public class Main extends Application {
             double screenY = CANVAS_HEIGHT - (particle.getY() * SCALE);
             double screenRadius = particle.getRadius() * SCALE;
 
-            gc.setFill(javafx.scene.paint.Color.web(particle.getColor()));
+            gc.setFill(Color.web(particle.getColor()));
             gc.fillOval(screenX - screenRadius, screenY - screenRadius,
                        screenRadius * 2, screenRadius * 2);
 
-            gc.setStroke(javafx.scene.paint.Color.WHITE);
-            gc.setLineWidth(1);
+            gc.setStroke(borderColor);
+            gc.setLineWidth(borderWidth);
             gc.strokeOval(screenX - screenRadius, screenY - screenRadius,
                          screenRadius * 2, screenRadius * 2);
         }
 
-        gc.setFill(javafx.scene.paint.Color.WHITE);
-        gc.setFont(javafx.scene.text.Font.font("Monospace", 14));
+        gc.setFill(textColor);
+        gc.setFont(textFont);
         gc.fillText("Particles: " + engine.getParticles().size(), 10, 20);
-    }
-
-    private void spawnRandomParticles(PhysicsEngine engine, int count,
-                                      double canvasWidth, double canvasHeight) {
-        Random rand = new Random();
-
-        for (int i = 0; i < count; i++) {
-            double x = rand.nextDouble() * (canvasWidth - 2) + 1;
-            double y = rand.nextDouble() * (canvasHeight - 2) + 1;
-            double radius = 0.2 + rand.nextDouble() * 0.3;
-            double mass = 1 + rand.nextDouble() * 9;
-
-            Particle particle = new Particle(x, y, radius, mass);
-
-            double vx = (rand.nextDouble() - 0.5) * 10;
-            double vy = (rand.nextDouble() - 0.5) * 10;
-            particle.setVelocity(vx, vy);
-
-            String[] colors = {"#FF6B6B", "#4ECDC4", "#45B7D1", "#FFA07A", "#98D8C8"};
-            particle.setColor(colors[rand.nextInt(colors.length)]);
-
-            engine.addParticle(particle);
-        }
     }
 
     public static void main(String[] args) {

@@ -2,24 +2,107 @@ package simulator.physics;
 
 import org.dyn4j.world.World;
 import org.dyn4j.geometry.Vector2;
+import org.dyn4j.dynamics.Body;
+import org.dyn4j.geometry.Rectangle;
+import org.dyn4j.geometry.MassType;
 import simulator.models.Particle;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 public class PhysicsEngine {
-    private World<org.dyn4j.dynamics.Body> world;
-    private List<Particle> particles;
-    private boolean running;
+    private World<org.dyn4j.dynamics.Body> world = new World();
+    private List<Particle> particles = new ArrayList();
+    private boolean running = false;
 
-    private static final double GRAVITY_Y = -9.8;
-    private static final double TIME_STEP = 1.0 / 60.0;
+    private double TIME_STEP;
+    private double WORLD_WIDTH;
+    private double WORLD_HEIGHT;
 
-    public PhysicsEngine() {
-        this.world = new World<>();
+    public static class Builder {
+        private boolean BOUNDED = true;
+        private double GRAVITY_X = 0;
+        private double GRAVITY_Y = -9.8;
+        private double WORLD_WIDTH = 16.0;
+        private double WORLD_HEIGHT = 12.0;
+
+        public void setBounded(boolean BOUNDED) {
+            this.BOUNDED = BOUNDED;
+        }
+
+        public void setGravityX(double GRAVITY_X) {
+            this.GRAVITY_X = GRAVITY_X;
+        }
+
+        public void setGravityY(double GRAVITY_Y) {
+            this.GRAVITY_Y = GRAVITY_Y;
+        }
+
+        public void setWorldWidth(double WORLD_WIDTH) {
+            this.WORLD_WIDTH = WORLD_WIDTH;
+        }
+
+        public void setWorldHeight(double WORLD_HEIGHT) {
+            this.WORLD_HEIGHT = WORLD_HEIGHT;
+        }
+
+        public PhysicsEngine build() {
+            return new PhysicsEngine(
+                    BOUNDED,
+                    GRAVITY_X, GRAVITY_Y,
+                    WORLD_WIDTH, WORLD_HEIGHT);
+        }
+    }
+
+    public static Builder builder() {
+        return new Builder();
+    }
+
+    private PhysicsEngine(
+            boolean BOUNDED,
+            double GRAVITY_X, double GRAVITY_Y,
+            double WORLD_WIDTH, double WORLD_HEIGHT) {
+        this.WORLD_WIDTH = WORLD_WIDTH;
+        this.WORLD_HEIGHT = WORLD_HEIGHT;
         this.world.setGravity(new Vector2(0, GRAVITY_Y));
-        this.particles = new ArrayList<>();
-        this.running = false;
+        if(BOUNDED) {
+            createBoundaryWalls();
+        }
+    }
+
+    private void createBoundaryWalls() {
+        createBoundaryWall(WORLD_WIDTH, 0.5, WORLD_WIDTH / 2, -0.25);
+        createBoundaryWall(WORLD_WIDTH, 0.5, WORLD_WIDTH / 2, WORLD_HEIGHT + 0.25);
+        createBoundaryWall(0.5, WORLD_HEIGHT, -0.25, WORLD_HEIGHT / 2);
+        createBoundaryWall(0.5, WORLD_HEIGHT, WORLD_WIDTH + 0.25, WORLD_HEIGHT / 2);
+    }
+
+    private void createBoundaryWall(double width, double height, double x, double y) {
+        Body boundary = new Body();
+        boundary.addFixture(new Rectangle(width, height));
+        boundary.setMass(MassType.INFINITE);
+        boundary.translate(x, y);
+        world.addBody(boundary);
+    }
+
+    public void addRandomParticles(int numParticles) {
+        for(int i = 0; i < numParticles; i++) {
+            addRandomParticle();
+        }
+    }
+
+    public void addRandomParticle() {
+        Random rand = new Random();
+        double x = 1 + rand.nextDouble() * (WORLD_WIDTH - 2);
+        double y = 1 + rand.nextDouble() * (WORLD_HEIGHT - 2);
+        double radius = 0.2 + rand.nextDouble() * 0.3;
+        double mass = 1 + rand.nextDouble() * 9;
+        Particle particle = new Particle(x, y, radius, mass);
+        double vx = (rand.nextDouble() - 0.5) * 10;
+        double vy = (rand.nextDouble() - 0.5) * 10;
+        particle.setVelocity(vx, vy);
+        addParticle(particle);
     }
 
     public void addParticle(Particle particle) {
@@ -32,9 +115,9 @@ public class PhysicsEngine {
         world.removeBody(particle.getBody());
     }
 
-    public void update() {
+    public void update(double timeStep) {
         if (!running) return;
-        world.update(TIME_STEP);
+        world.update(timeStep);
         updateParticleStates();
     }
 

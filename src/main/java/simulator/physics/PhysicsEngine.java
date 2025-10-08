@@ -26,7 +26,6 @@ public class PhysicsEngine {
         private double GRAVITY_Y = -9.8;
         private double WORLD_WIDTH = 16.0;
         private double WORLD_HEIGHT = 12.0;
-        private double TIME_STEP = 1.0 / 60.0;
 
         public void setBounded(boolean BOUNDED) {
             this.BOUNDED = BOUNDED;
@@ -48,17 +47,11 @@ public class PhysicsEngine {
             this.WORLD_HEIGHT = WORLD_HEIGHT;
         }
 
-        public void setTimeStep(double TIME_STEP) {
-            this.TIME_STEP = TIME_STEP;
-        }
-
         public PhysicsEngine build() {
-            assert 0 < TIME_STEP;
             return new PhysicsEngine(
                     BOUNDED,
                     GRAVITY_X, GRAVITY_Y,
-                    WORLD_WIDTH, WORLD_HEIGHT,
-                    TIME_STEP);
+                    WORLD_WIDTH, WORLD_HEIGHT);
         }
     }
 
@@ -69,9 +62,7 @@ public class PhysicsEngine {
     private PhysicsEngine(
             boolean BOUNDED,
             double GRAVITY_X, double GRAVITY_Y,
-            double WORLD_WIDTH, double WORLD_HEIGHT,
-            double TIME_STEP) {
-        this.TIME_STEP = TIME_STEP;
+            double WORLD_WIDTH, double WORLD_HEIGHT) {
         this.WORLD_WIDTH = WORLD_WIDTH;
         this.WORLD_HEIGHT = WORLD_HEIGHT;
         this.world.setGravity(new Vector2(0, GRAVITY_Y));
@@ -124,9 +115,9 @@ public class PhysicsEngine {
         world.removeBody(particle.getBody());
     }
 
-    public void update() {
+    public void update(double timeStep) {
         if (!running) return;
-        world.update(TIME_STEP);
+        world.update(timeStep);
         updateParticleStates();
     }
 

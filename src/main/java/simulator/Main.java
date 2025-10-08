@@ -16,6 +16,7 @@ import java.util.Random;
 
 public class Main extends Application {
 
+    private static final int FRAME_RATE = 60;
     private static final int CANVAS_WIDTH = 800;
     private static final int CANVAS_HEIGHT = 600;
     private static final double WORLD_WIDTH = 16.0;  // meters
@@ -87,14 +88,15 @@ public class Main extends Application {
 
     private void startGameLoop() {
         gameLoop = new AnimationTimer() {
+            private static long nsPerSec = 1000000000;
             private long prev = 0;
-            private long dt = 16666667; // 60 fps
+            private long dt = nsPerSec / (long) FRAME_RATE;
             @Override
             public void handle(long now) {
                 if(now - prev < dt) {
                     return;
                 }
-                engine.update();
+                engine.update((now - prev) / nsPerSec);
                 render();
                 prev = now;
             }

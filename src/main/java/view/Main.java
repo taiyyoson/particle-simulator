@@ -1,7 +1,6 @@
-package simulator;
+package view;
 
 import simulator.physics.PhysicsEngine;
-import simulator.models.Particle;
 import javafx.application.Application;
 import javafx.stage.Stage;
 import javafx.scene.layout.BorderPane;
@@ -9,10 +8,11 @@ import javafx.scene.canvas.Canvas;
 import javafx.scene.Scene;
 import javafx.scene.layout.HBox;
 import javafx.scene.control.Button;
-import javafx.scene.canvas.GraphicsContext;
 import javafx.animation.AnimationTimer;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
+import javafx.geometry.Insets;
+import javafx.geometry.Pos;
 
 
 public class Main extends Application {
@@ -24,15 +24,9 @@ public class Main extends Application {
     private static final double WORLD_HEIGHT = 12.0; // meters
     private static final double SCALE = CANVAS_WIDTH / WORLD_WIDTH; // pixels per meter
 
-    private static final Color backgroundColor = Color.web("#1a1a1a");
-    private static final Color borderColor = javafx.scene.paint.Color.WHITE;
-    private static final int borderWidth = 1;
-    private static final Color textColor = javafx.scene.paint.Color.WHITE;
-    private static final Font textFont = javafx.scene.text.Font.font("Monospace", 14);
-
+    private Window window;
     private PhysicsEngine engine;
     private Canvas canvas;
-    private GraphicsContext gc;
     private AnimationTimer gameLoop;
 
     @Override
@@ -41,8 +35,13 @@ public class Main extends Application {
 
         BorderPane root = new BorderPane();
         canvas = new Canvas(CANVAS_WIDTH, CANVAS_HEIGHT);
-        gc = canvas.getGraphicsContext2D();
         root.setCenter(canvas);
+        window = Window.builder(
+                engine,
+                canvas.getGraphicsContext2D(),
+                CANVAS_WIDTH / WORLD_WIDTH,
+                CANVAS_WIDTH, CANVAS_HEIGHT
+        ).build();
 
         root.setBottom(createControlPanel());
 
@@ -59,10 +58,10 @@ public class Main extends Application {
         System.out.println("Particle Simulator started with 50 particles!");
     }
 
-    private javafx.scene.layout.HBox createControlPanel() {
+    private HBox createControlPanel() {
         HBox controls = new HBox(10);
-        controls.setPadding(new javafx.geometry.Insets(10));
-        controls.setAlignment(javafx.geometry.Pos.CENTER);
+        controls.setPadding(new Insets(10));
+        controls.setAlignment(Pos.CENTER);
         controls.setStyle("-fx-background-color: #2c3e50;");
 
         Button pauseBtn = new Button("Pause");
@@ -111,27 +110,7 @@ public class Main extends Application {
     }
 
     private void render() {
-        gc.setFill(backgroundColor);
-        gc.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
-
-        for (Particle particle : engine.getParticles()) {
-            double screenX = particle.getX() * SCALE;
-            double screenY = CANVAS_HEIGHT - (particle.getY() * SCALE);
-            double screenRadius = particle.getRadius() * SCALE;
-
-            gc.setFill(Color.web(particle.getColor()));
-            gc.fillOval(screenX - screenRadius, screenY - screenRadius,
-                       screenRadius * 2, screenRadius * 2);
-
-            gc.setStroke(borderColor);
-            gc.setLineWidth(borderWidth);
-            gc.strokeOval(screenX - screenRadius, screenY - screenRadius,
-                         screenRadius * 2, screenRadius * 2);
-        }
-
-        gc.setFill(textColor);
-        gc.setFont(textFont);
-        gc.fillText("Particles: " + engine.getParticles().size(), 10, 20);
+        window.render();
     }
 
     public static void main(String[] args) {

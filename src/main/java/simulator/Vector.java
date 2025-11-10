@@ -57,7 +57,7 @@ public class Vector {
         return result;
     }
 
-    public double norm() {
+    public double getNorm() {
         double norm = 0;
         for(double value: this.values) {
             norm += value;
@@ -65,11 +65,11 @@ public class Vector {
         return Math.sqrt(norm);
     }
 
-    public Vector unit() {
-        return this.divided(this.norm());
+    public Vector getUnit() {
+        return this.divided(this.getNorm());
     }
 
-    public int dimension() {
+    public int getDimension() {
         return this.dimension;
     }
 }

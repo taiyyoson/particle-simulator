@@ -2,12 +2,16 @@ package simulator.models;
 
 import simulator.Vector;
 
+/**
+ * Body class - used to represent round physical bodies in a given dimension.
+ */
 public class Body {
     private int dimension;
     private Vector position;
     private Vector velocity;
     private Vector acceleration;
     private Double mass;
+    private Double radius;
 
     private Body(Builder builder) {
         this.dimension = builder.dimension;
@@ -15,6 +19,43 @@ public class Body {
         this.velocity = builder.velocity;
         this.acceleration = builder.acceleration;
         this.mass = builder.mass;
+        this.radius = builder.radius;
+    }
+
+    public int getDimension() {
+        return this.dimension;
+    }
+
+    public void updatePosition(Vector deltaPosition) {
+        this.position = this.position.add(deltaPosition);
+    }
+
+    public Vector getPosition() {
+        return this.position;
+    }
+
+    public void updateVelocity(Vector deltaVelocity) {
+        this.velocity = this.velocity.add(deltaVelocity);
+    }
+
+    public Vector getVelocity() {
+        return this.velocity;
+    }
+
+    public void updateAcceleration(Vector deltaAcceleration) {
+        this.acceleration = this.acceleration.add(deltaAcceleration);
+    }
+
+    public Vector getAcceleration() {
+        return this.acceleration;
+    }
+
+    public Double getMass() {
+        return this.mass;
+    }
+
+    public Double getRadius() {
+        return this.radius;
     }
 
     public Builder builder(int dimension) {
@@ -23,10 +64,11 @@ public class Body {
 
     private static class Builder {
         private int dimension;
-        private Vector position = null;
-        private Vector velocity = null;
-        private Vector acceleration;
         private Double mass = 0.0;
+        private Double radius = 0.0;
+        private Vector position;
+        private Vector velocity;
+        private Vector acceleration;
 
         private Builder(int dimension) {
             this.dimension = dimension;
@@ -37,6 +79,11 @@ public class Body {
 
         public Builder setMass(double mass) {
             this.mass = mass;
+            return this;
+        }
+
+        public Builder setRadius(double radius) {
+            this.radius = radius;
             return this;
         }
 
@@ -59,14 +106,17 @@ public class Body {
             if(this.dimension <= 0) {
                 throw new IllegalArgumentException("Dimension must be positive (dimension is " + this.dimension + ")");
             }
-            if(this.position.dimension() != this.dimension) {
-                throw new IllegalArgumentException("Position must be dimension " + this.dimension + " (currently " + this.position.dimension() + ")");
+            if(this.position.getDimension() != this.dimension) {
+                throw new IllegalArgumentException("Position must be dimension " + this.dimension + " (currently " + this.position.getDimension() + ")");
             }
-            if(this.velocity.dimension() != this.dimension) {
-                throw new IllegalArgumentException("Velocity must be dimension " + this.dimension + " (currently " + this.velocity.dimension() + ")");
+            if(this.velocity.getDimension() != this.dimension) {
+                throw new IllegalArgumentException("Velocity must be dimension " + this.dimension + " (currently " + this.velocity.getDimension() + ")");
             }
-            if(this.acceleration.dimension() != this.dimension) {
-                throw new IllegalArgumentException("Acceleration must be dimension " + this.dimension + " (currently " + this.acceleration.dimension() + ")");
+            if(this.acceleration.getDimension() != this.dimension) {
+                throw new IllegalArgumentException("Acceleration must be dimension " + this.dimension + " (currently " + this.acceleration.getDimension() + ")");
+            }
+            if(this.radius < 0) {
+                throw new IllegalArgumentException("Radius must be positive (currently " + this.radius + ")");
             }
             return new Body(this);
         }

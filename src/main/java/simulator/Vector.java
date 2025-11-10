@@ -1,0 +1,75 @@
+package simulator;
+
+/**
+ * Vector class. Used for positions, accelerations, forces, etc.
+ */
+public class Vector {
+    private int dimension;
+    private double[] values;
+
+    public Vector(int dimension) {
+        this.dimension = dimension;
+        this.values = new double[dimension];
+    }
+
+    public Vector(double[] values) {
+        this.dimension = values.length;
+        this.values = values;
+    }
+
+    public static Vector copy(Vector other) {
+        return new Vector(other.values.clone());
+    }
+
+    public void setValue(int dimension, double value) {
+        assert dimension < this.dimension;
+        values[dimension] = value;
+    }
+
+    public double getValue(int dimension) {
+        assert dimension < this.dimension;
+        return this.values[dimension];
+    }
+
+    public Vector add(Vector delta) {
+        assert delta.dimension == this.dimension;
+        Vector result = new Vector(this.dimension);
+        for(int dim = 0; dim < this.dimension; dim++) {
+            result.setValue(dim, this.getValue(dim) + delta.getValue(dim));
+        }
+        return result;
+    }
+
+    public Vector subtract(Vector delta) {
+        assert delta.dimension == this.dimension;
+        Vector result = new Vector(this.dimension);
+        for(int dim = 0; dim < this.dimension; dim++) {
+            result.setValue(dim, this.getValue(dim) - delta.getValue(dim));
+        }
+        return result;
+    }
+
+    public Vector divided(double scalar) {
+        Vector result = Vector.copy(this);
+        for(int dim = 0; dim < this.dimension; dim++) {
+            result.setValue(dim, result.getValue(dim) / scalar);
+        }
+        return result;
+    }
+
+    public double norm() {
+        double norm = 0;
+        for(double value: this.values) {
+            norm += value;
+        }
+        return Math.sqrt(norm);
+    }
+
+    public Vector unit() {
+        return this.divided(this.norm());
+    }
+
+    public int dimension() {
+        return this.dimension;
+    }
+}

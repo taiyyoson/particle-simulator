@@ -1,5 +1,11 @@
 package simulator.models;
 
+import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.paint.Color;
+
+/**
+ * Builder for both Body and DrawableBody.
+ */
 public class BodyBuilder {
     private int dimension;
     private Double mass = 0.0;
@@ -7,8 +13,12 @@ public class BodyBuilder {
     private Vector position;
     private Vector velocity;
     private Vector acceleration;
-    private String color;
+    private Color color = null;
 
+    /**
+     * Constructor - set dimension and default values for vectors (0 vector).
+     * @param dimension
+     */
     public BodyBuilder(int dimension) {
         this.dimension = dimension;
         this.position = new Vector(dimension);
@@ -16,36 +26,125 @@ public class BodyBuilder {
         this.acceleration = new Vector(dimension);
     }
 
+    /**
+     * Dimension getter
+     * @return dimension of the BodyBuilder
+     */
+    public int getDimension() {
+        return this.dimension;
+    }
+
+    /**
+     * Mass setter
+     * @param mass to which to set the mass of the body
+     * @return BodyBuilder instance to allow chaining
+     */
     public BodyBuilder setMass(double mass) {
         this.mass = mass;
         return this;
     }
 
+    /**
+     * Mass getter
+     * @return mass of the BodyBuilder
+     */
+    public Double getMass() {
+        return this.mass;
+    }
+
+    /**
+     * Radius setter
+     * @param radius to which to set the mass of the body
+     * @return BodyBuilder instance to allow chaining
+     */
     public BodyBuilder setRadius(double radius) {
         this.radius = radius;
         return this;
     }
 
+    /**
+     * Radius getter
+     * @return the radius of the BodyBuilder
+     */
+    public Double getRadius() {
+        return this.radius;
+    }
+
+    /**
+     * Position setter
+     * @param position to which to set the position of the body
+     * @return BodyBuilder instance to allow chaining
+     */
     public BodyBuilder setPosition(Vector position) {
         this.position = position;
         return this;
     }
 
+    /**
+     * Position getter
+     * @return the position of the BodyBuilder
+     */
+    public Vector getPosition() {
+        return this.position;
+    }
+
+    /**
+     * Velocity setter
+     * @param velocity to which to set the velocity of the body
+     * @return BodyBuilder instance to allow chaining
+     */
     public BodyBuilder setVelocity(Vector velocity) {
         this.velocity = velocity;
         return this;
     }
 
+    /**
+     * Velocity getter
+     * @return the velocity of the BodyBuilder
+     */
+    public Vector getVelocity() {
+        return this.velocity;
+    }
+
+    /**
+     * Acceleration setter
+     * @param acceleration the acceleration to which to set the acceleration of the body
+     * @return BodyBuilder instance to allow chaining
+     */
     public BodyBuilder setAcceleration(Vector acceleration) {
         this.acceleration = acceleration;
         return this;
     }
 
-    public BodyBuilder setColor(String color) {
+    /**
+     * Acceleration getter
+     * @return the acceleration of the BodyBuilder
+     */
+    public Vector getAcceleration() {
+        return this.acceleration;
+    }
+
+    /**
+     * Color setter
+     * @param color to which to set the color of the body
+     * @return BodyBuilder instance to allow chaining
+     */
+    public BodyBuilder setColor(Color color) {
         this.color = color;
         return this;
     }
 
+    /**
+     * Color getter
+     * @return the color of the BodyBuilder
+     */
+    public Color getColor() {
+        return this.color;
+    }
+
+    /**
+     * Private helper method to validate parameters necessary to create Body instance
+     */
     private void validateBody() {
         if(this.dimension <= 0) {
             throw new IllegalArgumentException("Dimension must be positive (dimension is " + this.dimension + ")");
@@ -64,17 +163,28 @@ public class BodyBuilder {
         }
     }
 
+    /**
+     * Body factory method
+     * @return a new Body created from this BodyBuilder
+     */
     public Body buildBody() {
         validateBody();
         return new Body(this);
     }
 
+    /**
+     * Private helper method to validate parameters necessary to create DrawableBody instnace
+     */
     private void validateDrawable() {
-        if(this.color == null || this.color.isEmpty() || this.color.isBlank()) {
+        if(this.color == null) {
             throw new IllegalArgumentException("Invalid color for DrawableBody");
         }
     }
 
+    /**
+     * DrawableBody factory method
+     * @return a new DrawableBody created from this BodyBuilder
+     */
     public DrawableBody buildDrawableBody() {
         validateBody();
         validateDrawable();

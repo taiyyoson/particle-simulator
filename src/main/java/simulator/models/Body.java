@@ -18,12 +18,12 @@ public class Body {
      * @param builder builder object to create Body from
      */
     public Body(BodyBuilder builder) {
-        this.dimension = builder.dimension;
-        this.position = builder.position;
-        this.velocity = builder.velocity;
-        this.acceleration = builder.acceleration;
-        this.mass = builder.mass;
-        this.radius = builder.radius;
+        this.dimension = builder.getDimension();
+        this.position = builder.getPosition();
+        this.velocity = builder.getVelocity();
+        this.acceleration = builder.getAcceleration();
+        this.mass = builder.getMass();
+        this.radius = builder.getRadius();
     }
 
     /**

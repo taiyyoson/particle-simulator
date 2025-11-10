@@ -5,7 +5,6 @@ import org.dyn4j.geometry.Vector2;
 import org.dyn4j.dynamics.Body;
 import org.dyn4j.geometry.Rectangle;
 import org.dyn4j.geometry.MassType;
-import simulator.models.Particle;
 
 import java.util.ArrayList;
 import java.util.List;

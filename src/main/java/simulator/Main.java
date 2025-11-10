@@ -1,7 +1,6 @@
 package simulator;
 
 import simulator.physics.PhysicsEngine;
-import simulator.models.Particle;
 import javafx.application.Application;
 import javafx.stage.Stage;
 import javafx.scene.layout.BorderPane;

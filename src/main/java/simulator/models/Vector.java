@@ -1,4 +1,4 @@
-package simulator;
+package simulator.models;
 
 /**
  * Vector class. Used for positions, accelerations, forces, etc.

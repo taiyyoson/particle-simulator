@@ -6,6 +6,8 @@ import simulator.Vector;
  * Body class - used to represent round physical bodies in a given dimension.
  */
 public class Body {
+    private static Double G = Double.parseDouble("6.67430e-11");
+
     private int dimension;
     private Vector position;
     private Vector velocity;
@@ -22,12 +24,20 @@ public class Body {
         this.radius = builder.radius;
     }
 
+    public Double getMass() {
+        return this.mass;
+    }
+
+    public Double getRadius() {
+        return this.radius;
+    }
+
     public int getDimension() {
         return this.dimension;
     }
 
     public void updatePosition(Vector deltaPosition) {
-        this.position = this.position.add(deltaPosition);
+        this.position = this.position.plus(deltaPosition);
     }
 
     public Vector getPosition() {
@@ -35,7 +45,7 @@ public class Body {
     }
 
     public void updateVelocity(Vector deltaVelocity) {
-        this.velocity = this.velocity.add(deltaVelocity);
+        this.velocity = this.velocity.plus(deltaVelocity);
     }
 
     public Vector getVelocity() {
@@ -43,19 +53,33 @@ public class Body {
     }
 
     public void updateAcceleration(Vector deltaAcceleration) {
-        this.acceleration = this.acceleration.add(deltaAcceleration);
+        this.acceleration = this.acceleration.plus(deltaAcceleration);
     }
 
     public Vector getAcceleration() {
         return this.acceleration;
     }
 
-    public Double getMass() {
-        return this.mass;
+    public Double getGraviationalForceMagnitudeTowards(Body attractor) {
+        assert this.dimension == attractor.dimension;
+        Double radius = this.position.minus(attractor.position).getMagnitude();
+        return G * (this.mass - attractor.mass) / radius;
     }
 
-    public Double getRadius() {
-        return this.radius;
+    public Vector getGraviationalForceTowards(Body attractor) {
+        assert this.dimension == attractor.dimension;
+        Vector deltaPosition = attractor.position.minus(this.position);
+        return deltaPosition.times(getGraviationalForceMagnitudeTowards(attractor));
+    }
+
+    public Double getGraviationalAccelerationMagnitudeTowards(Body attractor) {
+        assert this.dimension == attractor.dimension;
+        return getGraviationalForceMagnitudeTowards(attractor) / this.mass;
+    }
+
+    public Vector getGravitationalAccelerationTowards(Body attractor) {
+        assert this.dimension == attractor.dimension;
+        return getGraviationalForceTowards(attractor);
     }
 
     public Builder builder(int dimension) {

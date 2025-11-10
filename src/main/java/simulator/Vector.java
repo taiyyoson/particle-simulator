@@ -31,7 +31,7 @@ public class Vector {
         return this.values[dimension];
     }
 
-    public Vector add(Vector delta) {
+    public Vector plus(Vector delta) {
         assert delta.dimension == this.dimension;
         Vector result = new Vector(this.dimension);
         for(int dim = 0; dim < this.dimension; dim++) {
@@ -40,7 +40,7 @@ public class Vector {
         return result;
     }
 
-    public Vector subtract(Vector delta) {
+    public Vector minus(Vector delta) {
         assert delta.dimension == this.dimension;
         Vector result = new Vector(this.dimension);
         for(int dim = 0; dim < this.dimension; dim++) {
@@ -57,7 +57,15 @@ public class Vector {
         return result;
     }
 
-    public double getNorm() {
+    public Vector times(double scalar) {
+        Vector result = Vector.copy(this);
+        for(int dim = 0; dim < this.dimension; dim++) {
+            result.setValue(dim, this.getValue(dim) * scalar);
+        }
+        return result;
+    }
+
+    public double getMagnitude() {
         double norm = 0;
         for(double value: this.values) {
             norm += value;
@@ -66,7 +74,7 @@ public class Vector {
     }
 
     public Vector getUnit() {
-        return this.divided(this.getNorm());
+        return this.divided(this.getMagnitude());
     }
 
     public int getDimension() {

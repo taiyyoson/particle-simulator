@@ -1,0 +1,66 @@
+version: '3.8'
+
+services:
+  # MongoDB Database
+  mongodb:
+    image: mongo:7.0
+    container_name: particle-sim-mongodb
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_DATABASE: particle_simulator
+    volumes:
+      - mongodb_data:/data/db
+    networks:
+      - particle-sim-network
+    healthcheck:
+      test: echo 'db.runCommand("ping").ok' | mongosh localhost:27017/test --quiet
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Spring Boot Experiment Service
+  experiment-service:
+    build:
+      context: ./experiment-service
+      dockerfile: Dockerfile
+    container_name: experiment-service
+    ports:
+      - "8080:8080"
+    environment:
+      SPRING_DATA_MONGODB_URI: mongodb://mongodb:27017/particle_simulator
+      SPRING_DATA_MONGODB_DATABASE: particle_simulator
+    depends_on:
+      mongodb:
+        condition: service_healthy
+    networks:
+      - particle-sim-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # JavaFX Particle Simulator (optional - for headless/cloud deployment)
+  # Uncomment to run simulator in container (requires X11 forwarding or Xvfb)
+  # particle-simulator:
+  #   build:
+  #     context: .
+  #     dockerfile: Dockerfile
+  #   container_name: particle-simulator
+  #   environment:
+  #     EXPERIMENT_SERVICE_URL: http://experiment-service:8080
+  #   depends_on:
+  #     experiment-service:
+  #       condition: service_healthy
+  #   networks:
+  #     - particle-sim-network
+
+volumes:
+  mongodb_data:
+    driver: local
+
+networks:
+  particle-sim-network:
+    driver: bridge

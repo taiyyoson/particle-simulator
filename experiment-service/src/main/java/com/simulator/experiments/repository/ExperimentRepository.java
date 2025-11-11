@@ -15,4 +15,9 @@ import java.util.List;
 public interface ExperimentRepository extends MongoRepository<Experiment, String> {
 
     
+
+    /**
+     * Find all experiments ordered by timestamp descending (most recent first)
+     */
+    List<Experiment> findAllByOrderByTimestampDesc();
 }

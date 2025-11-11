@@ -41,6 +41,7 @@ public class PhysicsEngine {
     }
 
     public void update(Double timeStep) {
+        System.out.println("Timestep: " + timeStep);
         phaser.bulkRegister(bodies.size() + 1);
         bodies.forEach(body -> executorService.submit(() -> {
             body.update(timeStep, bodies, phaser);

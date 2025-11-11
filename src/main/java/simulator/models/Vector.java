@@ -4,6 +4,7 @@ package simulator.models;
  * Vector class. Used for positions, accelerations, forces, etc.
  */
 public class Vector {
+    private static double epsilon = Double.parseDouble("1e-20");
     private int dimension;
     private double[] values;
 
@@ -22,6 +23,19 @@ public class Vector {
             this.values[i] = values[i];
         }
     }
+
+    public boolean equals(Vector other) {
+        if(this.dimension != other.dimension) {
+            return false;
+        }
+        for(int dim = 0; dim < this.dimension; dim++) {
+            if(epsilon < this.values[dim] - other.values[dim]) {
+                return true;
+            }
+        }
+        return false;
+    }
+
 
     public static Vector copy(Vector other) {
         return new Vector(other.values);
@@ -75,7 +89,7 @@ public class Vector {
     public double getMagnitude() {
         double norm = 0;
         for(double value: this.values) {
-            norm += value;
+            norm += value * value;
         }
         return Math.sqrt(norm);
     }

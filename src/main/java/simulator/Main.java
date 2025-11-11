@@ -18,11 +18,10 @@ import javafx.scene.paint.Color;
 public class Main extends Application {
 
     private static final int FRAME_RATE = 60;
-    private static final int canvasWidth = 800;
-    private static final int canvasHeight = 600;
-    private static final double worldWidth = 16.0;  // meters
-    private static final double worldHeight = 12.0; // meters
-    private static final double scale = canvasWidth / worldWidth; // pixels per meter
+    private static final double SIMULATION_RATE = 5000;
+    private static final int canvasWidth = 1920;
+    private static final int canvasHeight = 1080;
+    private static final double scale = canvasWidth / 1000.0;
 
     private static final Color backgroundColor = Color.web("#1a1a1a");
 
@@ -36,19 +35,21 @@ public class Main extends Application {
         engine = new PhysicsEngine();
         engine.addBody(
                 new BodyBuilder(2)
-                        .setFillColor(Color.web("#2bfbe9"))
-                        .setPosition(
-                                new Vector(2)
-                                        .setValue(0, 1)
-                                        .setValue(1, 1)
-                        )
-                        .setVelocity(
-                                new Vector(2)
-                                        .setValue(0, 1)
-                                        .setValue(0, 1)
-                        )
+                        .setFillColor(Color.web("#fdc542"))
+                        .setRadius(50)
+                        .setMass(100000)
+                        .setPosition(new Vector(new double[]{500, 300}))
+                        .setVelocity(new Vector(new double[]{0.0, Double.parseDouble("-3e-3")}))
+                        .buildDrawableBody()
+        );
+
+        engine.addBody(
+                new BodyBuilder(2)
+                        .setFillColor(Color.web("#2bfb2d"))
                         .setRadius(10)
-                        .setMass(1)
+                        .setMass(10000)
+                        .setPosition(new Vector(new double[]{300, 300}))
+                        .setVelocity(new Vector(new double[]{0.0, Double.parseDouble("3e-2")}))
                         .buildDrawableBody()
         );
 
@@ -106,7 +107,7 @@ public class Main extends Application {
                 if(now - prev < dt) {
                     return;
                 }
-                engine.update((double) (now - prev) / (double) nsPerSec);
+                engine.update(SIMULATION_RATE * (double) (now - prev) / (double) nsPerSec);
                 engine.draw(graphicsContext, backgroundColor, canvasWidth, canvasHeight, scale);
                 prev = now;
             }

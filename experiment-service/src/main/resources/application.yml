@@ -1,0 +1,16 @@
+spring:
+  application:
+    name: experiment-service
+
+  data:
+    mongodb:
+      uri: ${SPRING_DATA_MONGODB_URI:mongodb://localhost:27017/particle_simulator}
+      database: ${SPRING_DATA_MONGODB_DATABASE:particle_simulator}
+
+server:
+  port: ${SERVER_PORT:8080}
+
+logging:
+  level:
+    com.simulator.experiments: INFO
+    org.springframework.data.mongodb: INFO

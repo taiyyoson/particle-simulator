@@ -96,6 +96,7 @@ public class Main extends Application {
             private static long nsPerSec = 1000000000;
             private long prev = 0;
             private long dt = nsPerSec / (long) FRAME_RATE;
+
             @Override
             public void handle(long now) {
                 if(now - prev < dt) {
@@ -110,6 +111,7 @@ public class Main extends Application {
     }
 
     private void render() {
+
         gc.setFill(backgroundColor);
         gc.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
 

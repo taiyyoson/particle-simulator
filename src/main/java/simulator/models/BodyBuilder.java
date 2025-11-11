@@ -1,6 +1,5 @@
 package simulator.models;
 
-import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
 
 /**
@@ -13,7 +12,9 @@ public class BodyBuilder {
     private Vector position;
     private Vector velocity;
     private Vector acceleration;
-    private Color color = null;
+    private Color fillColor = Color.WHITE;
+    private Color borderColor = Color.WHITE;
+    private Integer borderWeight = 0;
 
     /**
      * Constructor - set dimension and default values for vectors (0 vector).
@@ -124,22 +125,31 @@ public class BodyBuilder {
         return this.acceleration;
     }
 
-    /**
-     * Color setter
-     * @param color to which to set the color of the body
-     * @return BodyBuilder instance to allow chaining
-     */
-    public BodyBuilder setColor(Color color) {
-        this.color = color;
+    public BodyBuilder setFillColor(Color fillColor) {
+        this.fillColor = fillColor;
         return this;
     }
 
-    /**
-     * Color getter
-     * @return the color of the BodyBuilder
-     */
-    public Color getColor() {
-        return this.color;
+    public Color getFillColor() {
+        return this.fillColor;
+    }
+
+    public BodyBuilder setBorderColor(Color borderColor) {
+        this.borderColor = borderColor;
+        return this;
+    }
+
+    public Color getBorderColor() {
+        return this.borderColor;
+    }
+
+    public BodyBuilder setBorderWeight(Integer borderWeight) {
+        this.borderWeight = borderWeight;
+        return this;
+    }
+
+    public Integer getBorderWeight() {
+        return borderWeight;
     }
 
     /**
@@ -175,11 +185,7 @@ public class BodyBuilder {
     /**
      * Private helper method to validate parameters necessary to create DrawableBody instnace
      */
-    private void validateDrawable() {
-        if(this.color == null) {
-            throw new IllegalArgumentException("Invalid color for DrawableBody");
-        }
-    }
+    private void validateDrawable() {}
 
     /**
      * DrawableBody factory method

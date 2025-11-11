@@ -1,154 +1,58 @@
 package simulator.physics;
 
-import org.dyn4j.world.World;
-import org.dyn4j.geometry.Vector2;
-import org.dyn4j.dynamics.Body;
-import org.dyn4j.geometry.Rectangle;
-import org.dyn4j.geometry.MassType;
+import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.paint.Color;
+import simulator.models.DrawableBody;
+import simulator.models.Vector;
 
-import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
-import java.util.Random;
 
 public class PhysicsEngine {
-    private World<org.dyn4j.dynamics.Body> world = new World();
-    private List<Particle> particles = new ArrayList();
-    private boolean running = false;
+    private List<DrawableBody> bodies = new LinkedList();
 
-    private double TIME_STEP;
-    private double WORLD_WIDTH;
-    private double WORLD_HEIGHT;
+    public PhysicsEngine() {}
 
-    public static class Builder {
-        private boolean BOUNDED = true;
-        private double GRAVITY_X = 0;
-        private double GRAVITY_Y = -9.8;
-        private double WORLD_WIDTH = 16.0;
-        private double WORLD_HEIGHT = 12.0;
-
-        public void setBounded(boolean BOUNDED) {
-            this.BOUNDED = BOUNDED;
-        }
-
-        public void setGravityX(double GRAVITY_X) {
-            this.GRAVITY_X = GRAVITY_X;
-        }
-
-        public void setGravityY(double GRAVITY_Y) {
-            this.GRAVITY_Y = GRAVITY_Y;
-        }
-
-        public void setWorldWidth(double WORLD_WIDTH) {
-            this.WORLD_WIDTH = WORLD_WIDTH;
-        }
-
-        public void setWorldHeight(double WORLD_HEIGHT) {
-            this.WORLD_HEIGHT = WORLD_HEIGHT;
-        }
-
-        public PhysicsEngine build() {
-            return new PhysicsEngine(
-                    BOUNDED,
-                    GRAVITY_X, GRAVITY_Y,
-                    WORLD_WIDTH, WORLD_HEIGHT);
-        }
+    public PhysicsEngine(List<DrawableBody> bodies) {
+        this.bodies = bodies;
     }
 
-    public static Builder builder() {
-        return new Builder();
+    public void update(Double timeStep) {
+
     }
 
-    private PhysicsEngine(
-            boolean BOUNDED,
-            double GRAVITY_X, double GRAVITY_Y,
-            double WORLD_WIDTH, double WORLD_HEIGHT) {
-        this.WORLD_WIDTH = WORLD_WIDTH;
-        this.WORLD_HEIGHT = WORLD_HEIGHT;
-        this.world.setGravity(new Vector2(0, GRAVITY_Y));
-        if(BOUNDED) {
-            createBoundaryWalls();
-        }
-    }
+    public void draw(
+            GraphicsContext graphicsContext,
+            Color backgroundColor,
+            Integer canvasWidth,
+            Integer canvasHeight,
+            Double scale
+    ) {
+        graphicsContext.setFill(backgroundColor);
+        graphicsContext.fillRect(0, 0, canvasWidth, canvasHeight);
 
-    private void createBoundaryWalls() {
-        createBoundaryWall(WORLD_WIDTH, 0.5, WORLD_WIDTH / 2, -0.25);
-        createBoundaryWall(WORLD_WIDTH, 0.5, WORLD_WIDTH / 2, WORLD_HEIGHT + 0.25);
-        createBoundaryWall(0.5, WORLD_HEIGHT, -0.25, WORLD_HEIGHT / 2);
-        createBoundaryWall(0.5, WORLD_HEIGHT, WORLD_WIDTH + 0.25, WORLD_HEIGHT / 2);
-    }
+        bodies.forEach(body -> {
+            Vector position = body.getPosition();
+            Double screenX = position.getValue(0) * scale;
+            Double screenY = canvasHeight - (position.getValue(1) * scale);
+            double screenRadius = body.getRadius() * scale;
 
-    private void createBoundaryWall(double width, double height, double x, double y) {
-        Body boundary = new Body();
-        boundary.addFixture(new Rectangle(width, height));
-        boundary.setMass(MassType.INFINITE);
-        boundary.translate(x, y);
-        world.addBody(boundary);
-    }
+            graphicsContext.setFill(body.getFillColor());
+            graphicsContext.fillOval(
+                    screenX - screenRadius,
+                    screenY - screenRadius,
+                    screenRadius * 2 ,
+                    screenRadius * 2
+            );
 
-    public void addRandomParticles(int numParticles) {
-        for(int i = 0; i < numParticles; i++) {
-            addRandomParticle();
-        }
-    }
-
-    public void addRandomParticle() {
-        Random rand = new Random();
-        double x = 1 + rand.nextDouble() * (WORLD_WIDTH - 2);
-        double y = 1 + rand.nextDouble() * (WORLD_HEIGHT - 2);
-        double radius = 0.2 + rand.nextDouble() * 0.3;
-        double mass = 1 + rand.nextDouble() * 9;
-        Particle particle = new Particle(x, y, radius, mass);
-        double vx = (rand.nextDouble() - 0.5) * 10;
-        double vy = (rand.nextDouble() - 0.5) * 10;
-        particle.setVelocity(vx, vy);
-        addParticle(particle);
-    }
-
-    public void addParticle(Particle particle) {
-        particles.add(particle);
-        world.addBody(particle.getBody());
-    }
-
-    public void removeParticle(Particle particle) {
-        particles.remove(particle);
-        world.removeBody(particle.getBody());
-    }
-
-    public void update(double timeStep) {
-        if (!running) return;
-        world.update(timeStep);
-        updateParticleStates();
-    }
-
-    private void updateParticleStates() {
-        for (Particle particle : particles) {
-            particle.syncFromBody();
-        }
-    }
-
-    public void start() {
-        this.running = true;
-    }
-
-    public void pause() {
-        this.running = false;
-    }
-
-    public void resume() {
-        this.running = true;
-    }
-
-    public void reset() {
-        this.running = false;
-        for (Particle particle : new ArrayList<>(particles)) {
-            removeParticle(particle);
-        }
-    }
-
-    public World<org.dyn4j.dynamics.Body> getWorld() { return world; }
-    public List<Particle> getParticles() { return particles; }
-    public boolean isRunning() { return running; }
-    public void setGravity(double x, double y) {
-        world.setGravity(new Vector2(x, y));
+            graphicsContext.setStroke(body.getBorderColor());
+            graphicsContext.setLineWidth(body.getBorderWeight());
+            graphicsContext.strokeOval(
+                    screenX - screenRadius,
+                    screenY - screenRadius,
+                    screenRadius * 2,
+                    screenRadius * 2
+            );
+        });
     }
 }

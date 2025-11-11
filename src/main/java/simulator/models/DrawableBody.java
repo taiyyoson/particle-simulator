@@ -9,13 +9,26 @@ public class DrawableBody extends Body {
         graphicsContext = gc;
     }
 
-    private Color color;
+    private Color fillColor;
+    private Color borderColor;
+    private Integer borderWeight;
 
     public DrawableBody(BodyBuilder builder) {
         super(builder);
-        this.color = builder.getColor();
+        this.fillColor = builder.getFillColor();
+        this.borderColor = builder.getBorderColor();
+        this.borderWeight = builder.getBorderWeight();
     }
 
-    public void draw() {
+    public Color getFillColor() {
+        return this.fillColor;
+    }
+
+    public Color getBorderColor() {
+        return this.borderColor;
+    }
+
+    public Integer getBorderWeight() {
+        return this.borderWeight;
     }
 }

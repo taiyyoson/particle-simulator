@@ -12,9 +12,9 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Phaser;
 
 public class PhysicsEngine {
-    private Boolean running = false;
+    private Boolean running = true;
     private static Phaser phaser = new Phaser();
-    ExecutorService executorService = Executors.newVirtualThreadPerTaskExecutor();
+    ExecutorService executorService = Executors.newCachedThreadPool();
 
     private List<DrawableBody> bodies = new LinkedList();
 
@@ -36,9 +36,17 @@ public class PhysicsEngine {
         return this.running;
     }
 
+    public void addBody(DrawableBody body) {
+        bodies.add(body);
+    }
+
     public void update(Double timeStep) {
-        phaser.bulkRegister(bodies.size());
-        bodies.forEach(body -> executorService.submit(() -> body.update(timeStep, bodies, phaser)));
+        phaser.bulkRegister(bodies.size() + 1);
+        bodies.forEach(body -> executorService.submit(() -> {
+            body.update(timeStep, bodies, phaser);
+        }));
+        phaser.arriveAndAwaitAdvance();
+        phaser.arriveAndDeregister();
     }
 
     public void draw(
@@ -48,6 +56,9 @@ public class PhysicsEngine {
             Integer canvasHeight,
             Double scale
     ) {
+        if(!running) {
+            return;
+        }
         graphicsContext.setFill(backgroundColor);
         graphicsContext.fillRect(0, 0, canvasWidth, canvasHeight);
 
@@ -56,6 +67,7 @@ public class PhysicsEngine {
             Double screenX = position.getValue(0) * scale;
             Double screenY = canvasHeight - (position.getValue(1) * scale);
             double screenRadius = body.getRadius() * scale;
+            System.out.println("Drawing body at " + screenX + ", " + screenY);
 
             graphicsContext.setFill(body.getFillColor());
             graphicsContext.fillOval(

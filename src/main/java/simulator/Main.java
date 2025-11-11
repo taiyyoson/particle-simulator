@@ -1,5 +1,7 @@
 package simulator;
 
+import simulator.models.BodyBuilder;
+import simulator.models.Vector;
 import simulator.physics.PhysicsEngine;
 import javafx.application.Application;
 import javafx.stage.Stage;
@@ -11,7 +13,6 @@ import javafx.scene.control.Button;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.animation.AnimationTimer;
 import javafx.scene.paint.Color;
-import javafx.scene.text.Font;
 
 
 public class Main extends Application {
@@ -20,7 +21,7 @@ public class Main extends Application {
     private static final int canvasWidth = 800;
     private static final int canvasHeight = 600;
     private static final double worldWidth = 16.0;  // meters
-    private static final double WORLD_HEIGHT = 12.0; // meters
+    private static final double worldHeight = 12.0; // meters
     private static final double scale = canvasWidth / worldWidth; // pixels per meter
 
     private static final Color backgroundColor = Color.web("#1a1a1a");
@@ -33,15 +34,32 @@ public class Main extends Application {
     @Override
     public void start(Stage primaryStage) {
         engine = new PhysicsEngine();
+        engine.addBody(
+                new BodyBuilder(2)
+                        .setFillColor(Color.web("#2bfbe9"))
+                        .setPosition(
+                                new Vector(2)
+                                        .setValue(0, 1)
+                                        .setValue(1, 1)
+                        )
+                        .setVelocity(
+                                new Vector(2)
+                                        .setValue(0, 1)
+                                        .setValue(0, 1)
+                        )
+                        .setRadius(10)
+                        .setMass(1)
+                        .buildDrawableBody()
+        );
 
         BorderPane root = new BorderPane();
-        canvas = new Canvas(CANVAS_WIDTH, CANVAS_HEIGHT);
+        canvas = new Canvas(canvasWidth, canvasHeight);
         graphicsContext = canvas.getGraphicsContext2D();
         root.setCenter(canvas);
 
         root.setBottom(createControlPanel());
 
-        Scene scene = new Scene(root, CANVAS_WIDTH, CANVAS_HEIGHT + 50);
+        Scene scene = new Scene(root, canvasWidth, canvasHeight + 50);
         primaryStage.setTitle("Particle Simulator - Dyn4j + JavaFX");
         primaryStage.setScene(scene);
         primaryStage.setResizable(false);
@@ -75,25 +93,25 @@ public class Main extends Application {
 
     private void startGameLoop() {
         gameLoop = new AnimationTimer() {
-            private static long nsPerSec = 1000000000;
-            private long prev = 0;
-            private long dt = nsPerSec / (long) FRAME_RATE;
+            private static long nsPerSec = 1000000000;              // 1 s = 1000000000 ns
+            private long prev = -1;                                  // previous timestamp
+            private long dt = nsPerSec / (long) FRAME_RATE;         // change in time
 
             @Override
             public void handle(long now) {
+                if(prev == -1) {
+                    prev = now;
+                    return;
+                }
                 if(now - prev < dt) {
                     return;
                 }
                 engine.update((double) (now - prev) / (double) nsPerSec);
-                render();
+                engine.draw(graphicsContext, backgroundColor, canvasWidth, canvasHeight, scale);
                 prev = now;
             }
         };
         gameLoop.start();
-    }
-
-    private void render() {
-        engine.draw(graphicsContext, backgroundColor, canvasWidth, canvasHeight, scale);
     }
 
     public static void main(String[] args) {

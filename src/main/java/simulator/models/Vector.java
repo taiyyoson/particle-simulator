@@ -10,20 +10,27 @@ public class Vector {
     public Vector(int dimension) {
         this.dimension = dimension;
         this.values = new double[dimension];
+        for(int i = 0; i < dimension; i++) {
+            this.values[i] = 0;
+        }
     }
 
     public Vector(double[] values) {
         this.dimension = values.length;
-        this.values = values;
+        this.values = new double[values.length];
+        for(int i = 0; i < dimension; i++) {
+            this.values[i] = values[i];
+        }
     }
 
     public static Vector copy(Vector other) {
-        return new Vector(other.values.clone());
+        return new Vector(other.values);
     }
 
-    public void setValue(int dimension, double value) {
+    public Vector setValue(int dimension, double value) {
         assert dimension < this.dimension;
         values[dimension] = value;
+        return this;
     }
 
     public double getValue(int dimension) {
@@ -79,5 +86,17 @@ public class Vector {
 
     public int getDimension() {
         return this.dimension;
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder stringBuilder = new StringBuilder();
+        for(int dim = 0; dim < dimension; dim++) {
+            stringBuilder.append(this.getValue(dim));
+            if(dim != dimension - 1) {
+                stringBuilder.append(", ");
+            }
+        }
+        return stringBuilder.toString();
     }
 }

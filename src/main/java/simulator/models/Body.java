@@ -1,7 +1,6 @@
 package simulator.models;
 
 import java.util.List;
-import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Phaser;
 
 /**
@@ -48,7 +47,7 @@ public class Body {
 
     /**
      * Radius getter
-     * @return radius of body
+     * @return radius of bod+ y
      */
     public Double getRadius() {
         return this.radius;
@@ -128,16 +127,28 @@ public class Body {
         Vector netGravitationalForce = new Vector(this.dimension);
         for(Body body: bodies) {
             assert body.dimension == this.dimension;
-            netGravitationalForce = netGravitationalForce.plus(this.getGravitationalForceTowards(body));
+            if(body != this) {
+                netGravitationalForce = netGravitationalForce.plus(this.getGravitationalForceTowards(body));
+            }
         }
         return netGravitationalForce;
     }
 
     public void update(Double timestep, List<? extends Body> bodies, Phaser phaser) {
+        System.out.println("Timestep: " + timestep);
+        System.out.println("Initial state: ");
+        System.out.println("\tPosition: " + this.position);
+        System.out.println("\tVelocity: " + this.velocity);
+        System.out.println("\tAcceleration: " + this.acceleration);
         Vector netGravitationalForce = this.getNetGravitationalForce(bodies);
         phaser.arriveAndAwaitAdvance();
         updateAcceleration(netGravitationalForce.times(timestep));
         updateVelocity(this.acceleration.times(timestep));
-        updatePosition(netGravitationalForce.times(timestep));
+        updatePosition(this.velocity.times(timestep));
+        System.out.println("Final state: ");
+        System.out.println("\tPosition: " + this.position);
+        System.out.println("\tVelocity: " + this.velocity);
+        System.out.println("\tAcceleration: " + this.acceleration);
+        phaser.arriveAndDeregister();
     }
 }

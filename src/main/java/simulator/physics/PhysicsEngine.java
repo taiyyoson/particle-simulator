@@ -16,7 +16,6 @@ public class PhysicsEngine {
     private List<Particle> particles = new ArrayList();
     private boolean running = false;
 
-    private double TIME_STEP;
     private double WORLD_WIDTH;
     private double WORLD_HEIGHT;
 

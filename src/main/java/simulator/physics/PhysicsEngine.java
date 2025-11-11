@@ -7,8 +7,15 @@ import simulator.models.Vector;
 
 import java.util.LinkedList;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Phaser;
 
 public class PhysicsEngine {
+    private Boolean running = false;
+    private static Phaser phaser = new Phaser();
+    ExecutorService executorService = Executors.newVirtualThreadPerTaskExecutor();
+
     private List<DrawableBody> bodies = new LinkedList();
 
     public PhysicsEngine() {}
@@ -17,8 +24,21 @@ public class PhysicsEngine {
         this.bodies = bodies;
     }
 
-    public void update(Double timeStep) {
+    public void start() {
+        this.running = true;
+    }
 
+    public void pause() {
+        this.running = false;
+    }
+
+    public Boolean isRunning() {
+        return this.running;
+    }
+
+    public void update(Double timeStep) {
+        phaser.bulkRegister(bodies.size());
+        bodies.forEach(body -> executorService.submit(() -> body.update(timeStep, bodies, phaser)));
     }
 
     public void draw(

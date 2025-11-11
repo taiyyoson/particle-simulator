@@ -1,5 +1,9 @@
 package simulator.models;
 
+import java.util.List;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.Phaser;
+
 /**
  * Body class - used to represent round physical bodies in a given dimension.
  */
@@ -103,7 +107,7 @@ public class Body {
      * @param attractor another body which interacts with this gravitationally
      * @return the magnitude of the graviational force towards the other body
      */
-    public Double getGraviationalForceMagnitudeTowards(Body attractor) {
+    public Double getGravitationalForceMagnitudeTowards(Body attractor) {
         assert this.dimension == attractor.dimension;
         Double radius = attractor.position.minus(this.position).getMagnitude();
         return G * (this.mass - attractor.mass) / radius;
@@ -114,9 +118,26 @@ public class Body {
      * @param attractor anothe body which interacts with this gravitationally
      * @return the gravitational force towards the other body
      */
-    public Vector getGraviationalForceTowards(Body attractor) {
+    public Vector getGravitationalForceTowards(Body attractor) {
         assert this.dimension == attractor.dimension;
         Vector deltaPosition = attractor.position.minus(this.position);
-        return deltaPosition.getUnit().times(getGraviationalForceMagnitudeTowards(attractor));
+        return deltaPosition.getUnit().times(getGravitationalForceMagnitudeTowards(attractor));
+    }
+
+    public Vector getNetGravitationalForce(List<? extends Body> bodies) {
+        Vector netGravitationalForce = new Vector(this.dimension);
+        for(Body body: bodies) {
+            assert body.dimension == this.dimension;
+            netGravitationalForce = netGravitationalForce.plus(this.getGravitationalForceTowards(body));
+        }
+        return netGravitationalForce;
+    }
+
+    public void update(Double timestep, List<? extends Body> bodies, Phaser phaser) {
+        Vector netGravitationalForce = this.getNetGravitationalForce(bodies);
+        phaser.arriveAndAwaitAdvance();
+        updateAcceleration(netGravitationalForce.times(timestep));
+        updateVelocity(this.acceleration.times(timestep));
+        updatePosition(netGravitationalForce.times(timestep));
     }
 }

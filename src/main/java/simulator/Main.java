@@ -17,30 +17,26 @@ import javafx.scene.text.Font;
 public class Main extends Application {
 
     private static final int FRAME_RATE = 60;
-    private static final int CANVAS_WIDTH = 800;
-    private static final int CANVAS_HEIGHT = 600;
-    private static final double WORLD_WIDTH = 16.0;  // meters
+    private static final int canvasWidth = 800;
+    private static final int canvasHeight = 600;
+    private static final double worldWidth = 16.0;  // meters
     private static final double WORLD_HEIGHT = 12.0; // meters
-    private static final double SCALE = CANVAS_WIDTH / WORLD_WIDTH; // pixels per meter
+    private static final double scale = canvasWidth / worldWidth; // pixels per meter
 
     private static final Color backgroundColor = Color.web("#1a1a1a");
-    private static final Color borderColor = javafx.scene.paint.Color.WHITE;
-    private static final int borderWidth = 1;
-    private static final Color textColor = javafx.scene.paint.Color.WHITE;
-    private static final Font textFont = javafx.scene.text.Font.font("Monospace", 14);
 
     private PhysicsEngine engine;
     private Canvas canvas;
-    private GraphicsContext gc;
+    private GraphicsContext graphicsContext;
     private AnimationTimer gameLoop;
 
     @Override
     public void start(Stage primaryStage) {
-        engine = PhysicsEngine.builder().build();
+        engine = new PhysicsEngine();
 
         BorderPane root = new BorderPane();
         canvas = new Canvas(CANVAS_WIDTH, CANVAS_HEIGHT);
-        gc = canvas.getGraphicsContext2D();
+        graphicsContext = canvas.getGraphicsContext2D();
         root.setCenter(canvas);
 
         root.setBottom(createControlPanel());
@@ -51,9 +47,7 @@ public class Main extends Application {
         primaryStage.setResizable(false);
         primaryStage.show();
 
-        engine.addRandomParticles(50);
         startGameLoop();
-        engine.start();
 
         System.out.println("Particle Simulator started with 50 particles!");
     }
@@ -70,24 +64,12 @@ public class Main extends Application {
                 engine.pause();
                 pauseBtn.setText("Resume");
             } else {
-                engine.resume();
+                engine.start();
                 pauseBtn.setText("Pause");
             }
         });
 
-        Button resetBtn = new Button("Reset");
-        resetBtn.setOnAction(e -> {
-            engine.reset();
-            engine.addRandomParticles(50);
-            engine.start();
-        });
-
-        Button addParticlesBtn = new Button("Add 10 Particles");
-        addParticlesBtn.setOnAction(e -> {
-            engine.addRandomParticles(10);
-        });
-
-        controls.getChildren().addAll(pauseBtn, resetBtn, addParticlesBtn);
+        controls.getChildren().addAll(pauseBtn);
         return controls;
     }
 
@@ -111,28 +93,7 @@ public class Main extends Application {
     }
 
     private void render() {
-
-        gc.setFill(backgroundColor);
-        gc.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
-
-        for (Particle particle : engine.getParticles()) {
-            double screenX = particle.getX() * SCALE;
-            double screenY = CANVAS_HEIGHT - (particle.getY() * SCALE);
-            double screenRadius = particle.getRadius() * SCALE;
-
-            gc.setFill(Color.web(particle.getColor()));
-            gc.fillOval(screenX - screenRadius, screenY - screenRadius,
-                       screenRadius * 2, screenRadius * 2);
-
-            gc.setStroke(borderColor);
-            gc.setLineWidth(borderWidth);
-            gc.strokeOval(screenX - screenRadius, screenY - screenRadius,
-                         screenRadius * 2, screenRadius * 2);
-        }
-
-        gc.setFill(textColor);
-        gc.setFont(textFont);
-        gc.fillText("Particles: " + engine.getParticles().size(), 10, 20);
+        engine.draw(graphicsContext, backgroundColor, canvasWidth, canvasHeight, scale);
     }
 
     public static void main(String[] args) {

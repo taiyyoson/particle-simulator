@@ -14,7 +14,20 @@ import java.util.List;
 @Repository
 public interface ExperimentRepository extends MongoRepository<Experiment, String> {
 
-    
+    /**
+     * Find experiments by engine type
+     */
+    List<Experiment> findByEngineType(String engineType);
+
+    /**
+     * Find experiments within a time range
+     */
+    List<Experiment> findByTimestampBetween(Instant start, Instant end);
+
+    /**
+     * Find experiments by engine type and particle count
+     */
+    List<Experiment> findByEngineTypeAndParticleCount(String engineType, Integer particleCount);
 
     /**
      * Find all experiments ordered by timestamp descending (most recent first)

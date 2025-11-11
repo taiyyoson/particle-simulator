@@ -28,5 +28,14 @@ public class ExperimentController {
         return ResponseEntity.ok(experiments);
     }
 
+    @PostMapping
+    public ResponseEntity<Experiment> createExperiment(@RequestBody Experiment experiment) {
+        if (experiment.getTimestamp() == null) {
+            experiment.setTimestamp(Instant.now());
+        }
+
+        Experiment saved = repository.save(experiment);
+        return ResponseEntity.status(HttpStatus.CREATED).body(saved);
+    }
     
 }

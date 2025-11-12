@@ -4,11 +4,13 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.time.Instant;
+import java.util.List;
 import java.util.Map;
 
 /**
  * Flexible experiment data model for storing simulation runs.
  * Supports any physics engine type with extensible parameter/metrics storage.
+ * Stores complete particle state snapshots for N-body simulations.
  */
 @Document(collection = "experiments")
 public class Experiment {
@@ -20,6 +22,10 @@ public class Experiment {
     private Integer particleCount;
     private Double avgFPS;
     private Long computeTimeMs;
+
+
+    private List<ParticleSnapshot> particles;
+
     private Map<String, Object> parameters;
     private Map<String, Object> metrics;
     private Map<String, Object> metadata;
@@ -52,4 +58,7 @@ public class Experiment {
 
     public Map<String, Object> getMetadata() { return metadata; }
     public void setMetadata(Map<String, Object> metadata) { this.metadata = metadata; }
+
+    public List<ParticleSnapshot> getParticles() { return particles; }
+    public void setParticles(List<ParticleSnapshot> particles) { this.particles = particles; }
 }

@@ -4,6 +4,7 @@ import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
 import simulator.models.DrawableBody;
 import simulator.models.Vector;
+import simulator.cloud.ExperimentLogger;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -17,6 +18,11 @@ public class PhysicsEngine {
     ExecutorService executorService = Executors.newCachedThreadPool();
 
     private List<DrawableBody> bodies = new LinkedList();
+
+    private long lastSaveTime = 0;
+    private static final long SAVE_INTERVAL_MS = 5000;
+    private long frameCount = 0;
+    private long fpsStartTime = System.currentTimeMillis();
 
     public PhysicsEngine() {}
 
@@ -40,6 +46,10 @@ public class PhysicsEngine {
         bodies.add(body);
     }
 
+    public List<DrawableBody> getBodies() {
+        return bodies;
+    }
+
     public void update(Double timeStep) {
         System.out.println("Timestep: " + timeStep);
         phaser.bulkRegister(bodies.size() + 1);
@@ -48,6 +58,29 @@ public class PhysicsEngine {
         }));
         phaser.arriveAndAwaitAdvance();
         phaser.arriveAndDeregister();
+
+        frameCount++;
+
+        long now = System.currentTimeMillis();
+        if (now - lastSaveTime > SAVE_INTERVAL_MS) {
+            double avgFPS = calculateAvgFPS(now);
+            long computeTime = now - lastSaveTime;
+
+            ExperimentLogger.logSnapshot(
+                "NBODY_GRAVITATIONAL",
+                bodies,
+                avgFPS,
+                computeTime
+            );
+
+            lastSaveTime = now;
+        }
+    }
+
+    private double calculateAvgFPS(long now) {
+        long elapsedTime = now - fpsStartTime;
+        if (elapsedTime == 0) return 0;
+        return (frameCount * 1000.0) / elapsedTime;
     }
 
     public void draw(

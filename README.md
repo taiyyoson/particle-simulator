@@ -118,3 +118,47 @@ Expected output: You should see JSON responses with experiment data including au
 - Simulation loop: physics update → render cycle at stable FPS
 - Simple UI: pause/resume button and gravity slider
 - **All backend-focused; polished UI is deferred**
+
+
+
+## AI Usage Reflection (Prompting)
+
+
+**example Prompt**
+
+
+I have auto-save functionality in my PhysicsEngine that logs snapshots every 5 seconds. 
+Currently, the auto-save logic is inside the update() method, which gets called every frame:
+
+```java
+public void update(Double timeStep) {
+    // Physics update code
+    phaser.bulkRegister(bodies.size() + 1);
+    bodies.forEach(body -> executorService.submit(() -> {
+        body.update(timeStep, bodies, phaser);
+    }));
+    phaser.arriveAndAwaitAdvance();
+    phaser.arriveAndDeregister();
+
+    // Auto-save logic mixed in
+    frameCount++;
+    long now = System.currentTimeMillis();
+    if (now - lastSaveTime > SAVE_INTERVAL_MS) {
+        double avgFPS = calculateAvgFPS(now);
+        long computeTime = now - lastSaveTime;
+        ExperimentLogger.logSnapshot("NBODY_GRAVITATIONAL", bodies, avgFPS, computeTime);
+        lastSaveTime = now;
+    }
+}
+Problems with this approach:
+The update() method is cluttered with non-physics logic
+Auto-save timing depends on frame rate
+If the simulation pauses, auto-save stops checking
+How can I decouple the auto-save functionality from the physics update loop? I want the auto-save to run independently on its own schedule, so update() only handles physics.
+
+
+How AI Helped Me - 
+- Using `ScheduledExecutorService` for time-based tasks
+- Scheduling a task with `scheduleAtFixedRate()`
+- Running it on a separate thread
+- Keeping the physics update loop clean

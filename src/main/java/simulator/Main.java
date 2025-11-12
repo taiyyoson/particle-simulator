@@ -1,7 +1,8 @@
 package simulator;
 
+import simulator.models.BodyBuilder;
+import simulator.models.Vector;
 import simulator.physics.PhysicsEngine;
-import simulator.models.Particle;
 import javafx.application.Application;
 import javafx.stage.Stage;
 import javafx.scene.layout.BorderPane;
@@ -12,49 +13,60 @@ import javafx.scene.control.Button;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.animation.AnimationTimer;
 import javafx.scene.paint.Color;
-import javafx.scene.text.Font;
 
 
 public class Main extends Application {
 
     private static final int FRAME_RATE = 60;
-    private static final int CANVAS_WIDTH = 800;
-    private static final int CANVAS_HEIGHT = 600;
-    private static final double WORLD_WIDTH = 16.0;  // meters
-    private static final double WORLD_HEIGHT = 12.0; // meters
-    private static final double SCALE = CANVAS_WIDTH / WORLD_WIDTH; // pixels per meter
+    private static final double SIMULATION_RATE = 5000;
+    private static final int canvasWidth = 1920;
+    private static final int canvasHeight = 1080;
+    private static final double scale = canvasWidth / 1000.0;
 
     private static final Color backgroundColor = Color.web("#1a1a1a");
-    private static final Color borderColor = javafx.scene.paint.Color.WHITE;
-    private static final int borderWidth = 1;
-    private static final Color textColor = javafx.scene.paint.Color.WHITE;
-    private static final Font textFont = javafx.scene.text.Font.font("Monospace", 14);
 
     private PhysicsEngine engine;
     private Canvas canvas;
-    private GraphicsContext gc;
+    private GraphicsContext graphicsContext;
     private AnimationTimer gameLoop;
 
     @Override
     public void start(Stage primaryStage) {
-        engine = PhysicsEngine.builder().build();
+        engine = new PhysicsEngine();
+        engine.addBody(
+                new BodyBuilder(2)
+                        .setFillColor(Color.web("#fdc542"))
+                        .setRadius(50)
+                        .setMass(100000)
+                        .setPosition(new Vector(new double[]{500, 300}))
+                        .setVelocity(new Vector(new double[]{0.0, Double.parseDouble("-3e-3")}))
+                        .buildDrawableBody()
+        );
+
+        engine.addBody(
+                new BodyBuilder(2)
+                        .setFillColor(Color.web("#2bfb2d"))
+                        .setRadius(10)
+                        .setMass(10000)
+                        .setPosition(new Vector(new double[]{300, 300}))
+                        .setVelocity(new Vector(new double[]{0.0, Double.parseDouble("3e-2")}))
+                        .buildDrawableBody()
+        );
 
         BorderPane root = new BorderPane();
-        canvas = new Canvas(CANVAS_WIDTH, CANVAS_HEIGHT);
-        gc = canvas.getGraphicsContext2D();
+        canvas = new Canvas(canvasWidth, canvasHeight);
+        graphicsContext = canvas.getGraphicsContext2D();
         root.setCenter(canvas);
 
         root.setBottom(createControlPanel());
 
-        Scene scene = new Scene(root, CANVAS_WIDTH, CANVAS_HEIGHT + 50);
+        Scene scene = new Scene(root, canvasWidth, canvasHeight + 50);
         primaryStage.setTitle("Particle Simulator - Dyn4j + JavaFX");
         primaryStage.setScene(scene);
         primaryStage.setResizable(false);
         primaryStage.show();
 
-        engine.addRandomParticles(50);
         startGameLoop();
-        engine.start();
 
         System.out.println("Particle Simulator started with 50 particles!");
     }
@@ -71,67 +83,36 @@ public class Main extends Application {
                 engine.pause();
                 pauseBtn.setText("Resume");
             } else {
-                engine.resume();
+                engine.start();
                 pauseBtn.setText("Pause");
             }
         });
 
-        Button resetBtn = new Button("Reset");
-        resetBtn.setOnAction(e -> {
-            engine.reset();
-            engine.addRandomParticles(50);
-            engine.start();
-        });
-
-        Button addParticlesBtn = new Button("Add 10 Particles");
-        addParticlesBtn.setOnAction(e -> {
-            engine.addRandomParticles(10);
-        });
-
-        controls.getChildren().addAll(pauseBtn, resetBtn, addParticlesBtn);
+        controls.getChildren().addAll(pauseBtn);
         return controls;
     }
 
     private void startGameLoop() {
         gameLoop = new AnimationTimer() {
-            private static long nsPerSec = 1000000000;
-            private long prev = 0;
-            private long dt = nsPerSec / (long) FRAME_RATE;
+            private static long nsPerSec = 1000000000;              // 1 s = 1000000000 ns
+            private long prev = -1;                                  // previous timestamp
+            private long dt = nsPerSec / (long) FRAME_RATE;         // change in time
+
             @Override
             public void handle(long now) {
+                if(prev == -1) {
+                    prev = now;
+                    return;
+                }
                 if(now - prev < dt) {
                     return;
                 }
-                engine.update((double) (now - prev) / (double) nsPerSec);
-                render();
+                engine.update(SIMULATION_RATE * (double) (now - prev) / (double) nsPerSec);
+                engine.draw(graphicsContext, backgroundColor, canvasWidth, canvasHeight, scale);
                 prev = now;
             }
         };
         gameLoop.start();
-    }
-
-    private void render() {
-        gc.setFill(backgroundColor);
-        gc.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
-
-        for (Particle particle : engine.getParticles()) {
-            double screenX = particle.getX() * SCALE;
-            double screenY = CANVAS_HEIGHT - (particle.getY() * SCALE);
-            double screenRadius = particle.getRadius() * SCALE;
-
-            gc.setFill(Color.web(particle.getColor()));
-            gc.fillOval(screenX - screenRadius, screenY - screenRadius,
-                       screenRadius * 2, screenRadius * 2);
-
-            gc.setStroke(borderColor);
-            gc.setLineWidth(borderWidth);
-            gc.strokeOval(screenX - screenRadius, screenY - screenRadius,
-                         screenRadius * 2, screenRadius * 2);
-        }
-
-        gc.setFill(textColor);
-        gc.setFont(textFont);
-        gc.fillText("Particles: " + engine.getParticles().size(), 10, 20);
     }
 
     public static void main(String[] args) {

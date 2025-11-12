@@ -150,6 +150,8 @@ public void update(Double timeStep) {
         lastSaveTime = now;
     }
 }
+```
+
 Problems with this approach:
 The update() method is cluttered with non-physics logic
 Auto-save timing depends on frame rate

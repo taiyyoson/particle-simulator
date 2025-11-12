@@ -11,23 +11,44 @@ import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Phaser;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 public class PhysicsEngine {
     private Boolean running = true;
     private static Phaser phaser = new Phaser();
     ExecutorService executorService = Executors.newCachedThreadPool();
+    private ScheduledExecutorService snapshotScheduler = Executors.newSingleThreadScheduledExecutor();
 
     private List<DrawableBody> bodies = new LinkedList();
 
-    private long lastSaveTime = 0;
-    private static final long SAVE_INTERVAL_MS = 5000;
     private long frameCount = 0;
     private long fpsStartTime = System.currentTimeMillis();
 
-    public PhysicsEngine() {}
+    public PhysicsEngine() {
+        startSnapshotScheduler();
+    }
 
     public PhysicsEngine(List<DrawableBody> bodies) {
         this.bodies = bodies;
+        startSnapshotScheduler();
+    }
+
+    private void startSnapshotScheduler() {
+        snapshotScheduler.scheduleAtFixedRate(() -> {
+            if (running && !bodies.isEmpty()) {
+                long now = System.currentTimeMillis();
+                double avgFPS = calculateAvgFPS(now);
+                long computeTime = now - fpsStartTime;
+
+                ExperimentLogger.logSnapshot(
+                    "NBODY_GRAVITATIONAL",
+                    bodies,
+                    avgFPS,
+                    computeTime
+                );
+            }
+        }, 5, 5, TimeUnit.SECONDS);
     }
 
     public void start() {
@@ -60,21 +81,6 @@ public class PhysicsEngine {
         phaser.arriveAndDeregister();
 
         frameCount++;
-
-        long now = System.currentTimeMillis();
-        if (now - lastSaveTime > SAVE_INTERVAL_MS) {
-            double avgFPS = calculateAvgFPS(now);
-            long computeTime = now - lastSaveTime;
-
-            ExperimentLogger.logSnapshot(
-                "NBODY_GRAVITATIONAL",
-                bodies,
-                avgFPS,
-                computeTime
-            );
-
-            lastSaveTime = now;
-        }
     }
 
     private double calculateAvgFPS(long now) {

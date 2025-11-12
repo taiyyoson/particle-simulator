@@ -1,5 +1,75 @@
 # particle-simulator
 
+## Local Development Setup
+
+### Prerequisites
+
+1. **Java 17** - Required for JavaFX app and Spring Boot backend
+2. **Maven** - Build tool for both services
+3. **Docker** - For running MongoDB and services in containers
+
+### Docker Setup (without Docker Desktop)
+
+This project uses **Colima** as a lightweight Docker alternative:
+
+```bash
+# Install Colima (if not already installed)
+brew install colima
+
+# Start Colima
+colima start
+
+# Verify Docker is running
+docker ps
+```
+
+### Running the Services
+
+#### 1. Start MongoDB
+
+```bash
+# Start MongoDB container
+docker-compose up -d mongodb
+
+# Verify MongoDB is running
+docker ps
+```
+
+Expected output: You should see `particle-sim-mongodb` container running on port 27017.
+
+#### 2. Build and Run Spring Boot Experiment Service
+
+```bash
+# Navigate to experiment service
+cd experiment-service
+
+# Build the service (Note: Uses Java 22 without Lombok)
+mvn clean package -DskipTests
+
+# Run the service
+mvn spring-boot:run
+```
+
+Expected output: Service should start on port 8080 with message `Tomcat started on port 8080 (http)`.
+
+#### 3. Test the Backend API
+
+In a new terminal:
+
+```bash
+# Test POST - Create an experiment
+curl -X POST http://localhost:8080/experiments \
+  -H "Content-Type: application/json" \
+  -d '{"engineType":"DYNB4J","particleCount":50,"avgFPS":60.0,"computeTimeMs":100}'
+
+# Test GET - Retrieve all experiments
+curl http://localhost:8080/experiments
+```
+
+Expected output: You should see JSON responses with experiment data including auto-generated ID and timestamp.
+
+---
+
 ## Project (Refined) Scope
 
 ### Core Features (In Scope)

@@ -4,24 +4,51 @@ import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
 import simulator.models.DrawableBody;
 import simulator.models.Vector;
+import simulator.cloud.ExperimentLogger;
 
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Phaser;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 public class PhysicsEngine {
     private Boolean running = true;
     private static Phaser phaser = new Phaser();
     ExecutorService executorService = Executors.newCachedThreadPool();
+    private ScheduledExecutorService snapshotScheduler = Executors.newSingleThreadScheduledExecutor();
 
     private List<DrawableBody> bodies = new LinkedList();
 
-    public PhysicsEngine() {}
+    private long frameCount = 0;
+    private long fpsStartTime = System.currentTimeMillis();
+
+    public PhysicsEngine() {
+        startSnapshotScheduler();
+    }
 
     public PhysicsEngine(List<DrawableBody> bodies) {
         this.bodies = bodies;
+        startSnapshotScheduler();
+    }
+
+    private void startSnapshotScheduler() {
+        snapshotScheduler.scheduleAtFixedRate(() -> {
+            if (running && !bodies.isEmpty()) {
+                long now = System.currentTimeMillis();
+                double avgFPS = calculateAvgFPS(now);
+                long computeTime = now - fpsStartTime;
+
+                ExperimentLogger.logSnapshot(
+                    "NBODY_GRAVITATIONAL",
+                    bodies,
+                    avgFPS,
+                    computeTime
+                );
+            }
+        }, 5, 5, TimeUnit.SECONDS);
     }
 
     public void start() {
@@ -40,6 +67,10 @@ public class PhysicsEngine {
         bodies.add(body);
     }
 
+    public List<DrawableBody> getBodies() {
+        return bodies;
+    }
+
     public void update(Double timeStep) {
         System.out.println("Timestep: " + timeStep);
         phaser.bulkRegister(bodies.size() + 1);
@@ -48,6 +79,14 @@ public class PhysicsEngine {
         }));
         phaser.arriveAndAwaitAdvance();
         phaser.arriveAndDeregister();
+
+        frameCount++;
+    }
+
+    private double calculateAvgFPS(long now) {
+        long elapsedTime = now - fpsStartTime;
+        if (elapsedTime == 0) return 0;
+        return (frameCount * 1000.0) / elapsedTime;
     }
 
     public void draw(

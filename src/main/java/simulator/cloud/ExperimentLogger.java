@@ -5,25 +5,35 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.time.Instant;
-import java.util.Map;
 
-
+/**
+ * Minimal HTTP client for logging experiments to the backend.
+ * Synchronous, no callbacks, just sends data.
+ */
 public class ExperimentLogger {
 
     private static final String BACKEND_URL = "http://localhost:8080/experiments";
     private static final HttpClient client = HttpClient.newHttpClient();
 
-
+    /**
+     * Post experiment data to backend service
+     */
     public static void logExperiment(
             String engineType,
             int particleCount,
             double avgFPS,
-            long computeTimeMs,
-            Map<String, Object> parameters,
-            Map<String, Object> metrics) {
+            long computeTimeMs) {
 
         try {
-            String json = buildJson(engineType, particleCount, avgFPS, computeTimeMs, parameters, metrics);
+            // Build simple JSON manually
+            String json = String.format(
+                "{\"timestamp\":\"%s\",\"engineType\":\"%s\",\"particleCount\":%d,\"avgFPS\":%.2f,\"computeTimeMs\":%d}",
+                Instant.now().toString(),
+                engineType,
+                particleCount,
+                avgFPS,
+                computeTimeMs
+            );
 
             HttpRequest request = HttpRequest.newBuilder()
                     .uri(URI.create(BACKEND_URL))
@@ -34,59 +44,13 @@ public class ExperimentLogger {
             HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
 
             if (response.statusCode() == 201) {
-                System.out.println("Experiment logged successfully: " + response.body());
+                System.out.println("✓ Experiment logged successfully");
             } else {
-                System.err.println("Failed to log experiment. Status: " + response.statusCode());
+                System.err.println("✗ Failed to log experiment. Status: " + response.statusCode());
             }
 
         } catch (Exception e) {
-            System.err.println("Error logging experiment: " + e.getMessage());
+            System.err.println("✗ Error logging experiment: " + e.getMessage());
         }
-    }
-
-
-    private static String buildJson(
-            String engineType,
-            int particleCount,
-            double avgFPS,
-            long computeTimeMs,
-            Map<String, Object> parameters,
-            Map<String, Object> metrics) {
-
-        StringBuilder json = new StringBuilder("{");
-        json.append("\"timestamp\":\"").append(Instant.now().toString()).append("\",");
-        json.append("\"engineType\":\"").append(engineType).append("\",");
-        json.append("\"particleCount\":").append(particleCount).append(",");
-        json.append("\"avgFPS\":").append(avgFPS).append(",");
-        json.append("\"computeTimeMs\":").append(computeTimeMs);
-
-        if (parameters != null && !parameters.isEmpty()) {
-            json.append(",\"parameters\":").append(mapToJson(parameters));
-        }
-
-        if (metrics != null && !metrics.isEmpty()) {
-            json.append(",\"metrics\":").append(mapToJson(metrics));
-        }
-
-        json.append("}");
-        return json.toString();
-    }
-
-    private static String mapToJson(Map<String, Object> map) {
-        StringBuilder json = new StringBuilder("{");
-        boolean first = true;
-        for (Map.Entry<String, Object> entry : map.entrySet()) {
-            if (!first) json.append(",");
-            json.append("\"").append(entry.getKey()).append("\":");
-            Object value = entry.getValue();
-            if (value instanceof String) {
-                json.append("\"").append(value).append("\"");
-            } else {
-                json.append(value);
-            }
-            first = false;
-        }
-        json.append("}");
-        return json.toString();
     }
 }

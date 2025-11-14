@@ -18,7 +18,7 @@ import javafx.scene.paint.Color;
 public class Main extends Application {
 
     private static final int FRAME_RATE = 60;
-    private static final double SIMULATION_RATE = 5000;
+    private static final double SIMULATION_RATE = 10000;
     private static final int canvasWidth = 1920;
     private static final int canvasHeight = 1080;
     private static final double scale = canvasWidth / 1000.0;
@@ -107,7 +107,7 @@ public class Main extends Application {
                 if(now - prev < dt) {
                     return;
                 }
-                engine.update(SIMULATION_RATE * (double) (now - prev) / (double) nsPerSec);
+                engine.update(SIMULATION_RATE / FRAME_RATE);
                 engine.draw(graphicsContext, backgroundColor, canvasWidth, canvasHeight, scale);
                 prev = now;
             }

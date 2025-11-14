@@ -17,7 +17,7 @@ import java.util.concurrent.TimeUnit;
 public class PhysicsEngine {
     private Boolean running = true;
     private static Phaser phaser = new Phaser();
-    ExecutorService executorService = Executors.newCachedThreadPool();
+    ExecutorService executorService = Executors.newVirtualThreadPerTaskExecutor();
     private ScheduledExecutorService snapshotScheduler = Executors.newSingleThreadScheduledExecutor();
 
     private List<DrawableBody> bodies = new LinkedList();
